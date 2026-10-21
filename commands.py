@@ -5,16 +5,16 @@ from renamer import rename_files
 def show_help():
     print("""
     help - Show the help page with all commands listed and described.
-    list - 
+    listf - List all files in a location 
     read - 
     rename -  
     """)
 
 
 commands = {
-    "help": show_help,
-    "list-files": list_files,
-    "read-file": read_file,
-    "rename": rename_files,
-    "exit": "func",
+    "help": ...,
+    "listf": ...,
+    "summf": ...,
+    "renamef": ...,
+    "exit": ...,
 }

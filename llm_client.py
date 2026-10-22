@@ -3,7 +3,7 @@ import json
 
 from openai import OpenAI
 
-from file_reader import Result, list_files_function, read_file_function, list_files, read_file, Result
+from file_reader import Result, list_files_function, read_file_function, list_files, read_file
 from prompts import system_instruction
 from renamer import rename_files_function, rename_files
 from config import CONFIG

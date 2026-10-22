@@ -38,16 +38,18 @@ Example:
 help -h
 """
 
-help_listf = r"""Usage: listf [OPTIONS] PATH
-List all files in a location. Only the following files are listed: 
+help_listf = r"""List all files in a location. Only the following files are listed: 
 pdf, txt, md, png, jpeg, jpg, webp, gif.
-
--r, --recursive               List all files recursively from all subfolders in a given PATH
--s, --save                    Save the result for LLM.
-
-Example:
-listf -rs C:\Users\Public\Documents
 """
+listf_recursive_arg = "List all files recursively from all subfolders in a given PATH."
+listf_save_arg = "Save the result for LLM."
+# Usage: listf [OPTIONS] PATH
+# -r, --recursive               List all files recursively from all subfolders in a given PATH
+# -s, --save                    Save the result for LLM.
+#
+# Example:
+# listf -rs 'C:\Users\Public\Documents'
+
 
 help_summf = r"""Usage: summf [OPTIONS] PATH
 Instruct an LLM to read a file and summarize it for you. Only the following files are supported: 
@@ -58,7 +60,7 @@ pdf, txt, md, png, jpeg, jpg, webp, gif. Thinking is off by default.
 -t, --thinking                Enable thinking for the model. This option slows down the process.
 
 Examples:
-summarize -et C:\Users\Public\Documents\cryptic_secrets.txt
+summarize -et 'C:\Users\Public\Documents\cryptic_secrets.txt'
 """
 
 help_renamef = r"""Usage: renamef [OPTIONS] [PATH] [NEW-FILE-NAME]
@@ -74,7 +76,7 @@ Thinking is off by default.
 Examples:
 renamef C:\Users\Public\Documents\cryptic_secrets.txt not_secret_anymore.txt
 renamef -f
-renamef -ar C:\Users\Public\Documents\
+renamef -ar 'C:\Users\Public\Documents\'
 """
 
 help_exit = r"""Usage: exit

@@ -29,11 +29,13 @@ if ollama_path is None:
 else:
     ollama.server()
 
-    parser = argparse.ArgumentParser(prog="rnm")
+    parser = argparse.ArgumentParser(prog="")  # Empty string removes misguiding app name from help's "usage:" section
     subparsers = parser.add_subparsers(dest="command")
+
+    help_parser = subparsers.add_parser("help", description="List available commands.")
     # add_parser() registers "listf" as a command
     listf_parser = subparsers.add_parser("listf", description=help_listf)
-    listf_parser.add_argument("path")  # create attribute named "path" where user input is stored (positional argument)
+    listf_parser.add_argument("PATH")  # create attribute named "path" where user input is stored (positional argument)
     listf_parser.add_argument("-r", "--recursive", action="store_true", help=listf_recursive_arg)
     listf_parser.add_argument("-s", "--save", action="store_true", help=listf_save_arg)
 
@@ -41,9 +43,9 @@ else:
 def parse_arguments(command: list[str]):
     args = parser.parse_args(command)
     if args.command == "help":
-        commands["help"](args.help)
+        commands["help"]()
     elif args.command == "listf":
-        commands["listf"](args.recursive, args.save, args.path)
+        commands["listf"](path=args.PATH.strip('"'), recursive=args.recursive, save=args.save)
     elif args.command == "summf":
         ...
 

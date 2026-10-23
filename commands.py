@@ -7,10 +7,7 @@ paths_dict: dict[str, list] = {}
 
 
 def _help(_help: bool = False):
-    if not _help:
-        print(command_list)
-    else:
-        print(help_help)
+    print(command_list)
 
 
 def listf(path: str, recursive: bool = False, save: bool = False):
@@ -21,7 +18,8 @@ def listf(path: str, recursive: bool = False, save: bool = False):
     else:
         list_result: Result = list_files(path, recursive_listing=True)
     if issue := list_result.text:
-        return issue
+        print(issue)
+        return None
     if save:
         paths_dict = list_result.paths
 

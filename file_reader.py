@@ -149,4 +149,4 @@ read_file_function = {
 }
 
 if __name__ == "__main__":
-    print(read_file(r""))
+    print(list_files(r"C:\Users\sethg\Desktop\pdf_folder - tests\testy"))

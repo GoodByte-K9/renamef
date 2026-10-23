@@ -54,16 +54,16 @@ def install() -> None:
         subprocess.run(["open", str(installer)])
 
 
-def server() -> subprocess.Popen | None:
-    for process in psutil.process_iter(["name"]):  # shuffle through all active processes
+def server() -> None:
+    for process in psutil.process_iter(["name"]):  # run through all active processes
         process_name = process.info["name"]
         if process_name is None:
             continue
         elif process_name.lower().startswith("ollama"):
             return None
 
-    ollama_server = subprocess.Popen(["ollama", "serve"])
-    return ollama_server
+    subprocess.Popen(["ollama", "serve"])
+    return None
 
 
 if __name__ == "__main__":

@@ -27,7 +27,7 @@ if ollama_path is None:
         else:
             print("Invalid answer...")
 else:
-    ollama_server = ollama.server()
+    ollama.server()
 
     parser = argparse.ArgumentParser(prog="rnm")
     subparsers = parser.add_subparsers(dest="command")
@@ -48,9 +48,10 @@ def parse_arguments(command: list[str]):
         ...
 
 
-posix = False if platform.system() == "Windows" else True
+# Must specify POSIX for shlex, lest it fail at reading paths with backslashes
+is_posix = False if platform.system() == "Windows" else True
 while running:
-    user_input = shlex.split(input("> "), posix=posix)
+    user_input = shlex.split(input("> "), posix=is_posix)
     try:
         parse_arguments(user_input)
     except SystemExit:

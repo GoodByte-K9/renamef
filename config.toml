@@ -1,3 +1,8 @@
+#
+[projects.scripts]
+rnm = "main:main"  # Users need to use "pip install ." at project root to create an isolated environment for the app and
+                   # puts rnm on system PATH to enable it to run from terminal regardless of cwd
+
 [llm]
 model = "gemma4:e2b"
 

@@ -61,8 +61,8 @@ def list_files(folder_path: str, recursive_listing: bool = False) -> Result:
 
 list_files_function = {
     "name": "list_files",
-    "description": "Read a file in a given folder path. The function returns a dataclass turned JSON. If something "
-                   "goes wrong, it returns a list[str] with a 'WARNING:' or 'ERROR:' message. The function will only "
+    "description": "List all files in a given folder path. The function returns a dataclass turned JSON. If something "
+                   "goes wrong, it shows a relevant 'WARNING:' or 'ERROR:' message. The function will only "
                    "check for the following files: pdf, txt, md, png, jpeg, jpg, webp, gif.",
     "parameters": {
         "type": "object",
@@ -139,7 +139,7 @@ read_file_function = {
             },
             "expand_context": {
                 "type": "boolean",
-                "description": "If True, function will return up to 1500 characters of text, or send all images in a "
+                "description": "If True, function will return up to 2500 characters of text, or send all images from a "
                                "pdf. Use only when you lack enough context to understand the document."
             }
         },
@@ -149,4 +149,4 @@ read_file_function = {
 }
 
 if __name__ == "__main__":
-    print(read_file(r""))
+    print(list_files(r"C:\Users\sethg\Desktop\pdf_folder - tests\testy"))

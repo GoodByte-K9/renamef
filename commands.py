@@ -13,7 +13,7 @@ def _help(_help: bool = False):
         print(help_help)
 
 
-def listf(path: str, recursive: bool = False, save: bool = False):
+def listf(path: str, recursive: bool = False, save: bool = False) -> str | None:
     global paths_dict
 
     if not recursive:

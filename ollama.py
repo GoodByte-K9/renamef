@@ -4,9 +4,12 @@ import subprocess
 import platform
 import tempfile
 import psutil
+import shutil
 
 import requests
 from tqdm import tqdm
+
+from config import CONFIG
 
 INSTALLER_URLS = {
             "Windows": "https://ollama.com/download/OllamaSetup.exe",
@@ -62,8 +65,19 @@ def server() -> None:
         elif process_name.lower().startswith("ollama"):
             return None
 
-    subprocess.Popen(["ollama", "serve"])
+    logs_folder = Path(__name__).parent / "logs"
+    logs_folder.mkdir(parents=True, exist_ok=True)
+
+    with open("logs/ollama.log", "a", encoding="utf-8") as log:  # "a" = append
+        subprocess.Popen(["ollama", "serve"], stdout=log, stderr=log)
     return None
+
+
+def pull_model() -> None:
+    model = CONFIG["llm"]["model"]
+    model_present = subprocess.Popen(["ollama", "show", model], stdout=subprocess.PIPE)
+    if str(model_present.communicate()).startswith("Error"):
+        subprocess.Popen(["ollama", "pull", model])
 
 
 if __name__ == "__main__":

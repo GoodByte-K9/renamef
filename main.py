@@ -26,16 +26,17 @@ if ollama_path is None:
             break
         else:
             print("Invalid answer...")
-else:
-    ollama.server()
 
-    parser = argparse.ArgumentParser(prog="rnm")
-    subparsers = parser.add_subparsers(dest="command")
-    # add_parser() registers "listf" as a command
-    listf_parser = subparsers.add_parser("listf", description=help_listf)
-    listf_parser.add_argument("path")  # create attribute named "path" where user input is stored (positional argument)
-    listf_parser.add_argument("-r", "--recursive", action="store_true", help=listf_recursive_arg)
-    listf_parser.add_argument("-s", "--save", action="store_true", help=listf_save_arg)
+parser = argparse.ArgumentParser(prog="rnm")
+subparsers = parser.add_subparsers(dest="command")
+# add_parser() registers "listf" as a command
+listf_parser = subparsers.add_parser("listf", description=help_listf)
+listf_parser.add_argument("path")  # create attribute named "path" where user input is stored (positional argument)
+listf_parser.add_argument("-r", "--recursive", action="store_true", help=listf_recursive_arg)
+listf_parser.add_argument("-s", "--save", action="store_true", help=listf_save_arg)
+
+ollama.server()
+ollama.pull_model()
 
 
 def parse_arguments(command: list[str]):

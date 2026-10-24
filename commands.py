@@ -13,7 +13,7 @@ paths_dict: dict[str, list] = {}
 
 
 def _help(_help: bool = False):
-    print(command_list)
+    print(help_command_list)
 
 
 def listf(path: str, recursive: bool = False, save: bool = False) -> str | None:
@@ -42,6 +42,7 @@ def summf(file_path: str, expand: bool = False, thinking: bool = False) -> None:
     else:
         instruction = instruction_seed + prompts.summf_default
 
+    print("Reading the document and contriving a summary...")
     response = llm.chat(instruction)
     print(response)
     subprocess.Popen(

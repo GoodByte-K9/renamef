@@ -20,7 +20,8 @@ install_confirmation = ("\nNo installation found. Ollama is required for the app
 
 install_warning = "Ollama is required for the application to work. Exiting application..."
 
-command_list = """
+# ------------------------------ HELP ------------------------------ #
+help_command_list = """
     help - List available commands.
     listf - List all files in a location.
     summf - Summarize file contents.
@@ -30,15 +31,7 @@ command_list = """
     Run <command> --help for more details.
     """
 
-help_help = r"""Usage: help [OPTIONS]
-List available commands.
-
--h, --help                    Show details of the help command.
-
-Example:
-help -h
-"""
-
+# ------------------------------ LISTF ------------------------------ #
 help_listf = r"""List all files in a location. PATH represents an absolute path of your choice.
 Only the following files are listed: pdf, txt, md, png, jpeg, jpg, webp, gif."""
 
@@ -48,17 +41,20 @@ listf_recursive_arg = ("List all files recursively from all subfolders in a give
 listf_save_arg = "Save the result for LLM."
 # listf -rs 'C:\Users\Public\Documents'
 
-help_summf = ("Instruct an LLM to read a file and summarize it for you. Only the following files are supported:\n"
-              "pdf, txt, md, png, jpeg, jpg, webp, gif. Thinking is off by default.")
+# ------------------------------ SUMMF ------------------------------ #
+help_summf = ("Instruct an LLM to read a file and summarize it for you. Attempts to exclude personally identifiable "
+              "information. Thinking off by default. Only the following files are supported:\n"
+              "pdf, txt, md, png, jpeg, jpg, webp, gif.")
 
-summf_expand_arg = ("Increase the amount of text the LLM reads from pdf, txt, and md files."
-                    "This option slows down the process.")
+summf_expand_arg = ("Increase the amount of content the LLM reads from pdf, txt, and md files."
+                    "This option may slow down the process.")
 
-summf_thinking_arg = "Enable thinking for the model. This option slows down the process."
+summf_thinking_arg = "Enable thinking for the model. This option may slow down the process."
 
 # Examples:
 # summarize -et 'C:\Users\Public\Documents\cryptic_secrets.txt'
 
+# ------------------------------ RENAMEF ------------------------------ #
 help_renamef = ("Instruct an LLM to rename a given file based on file context. Give a path to a file, or load the "
                 "results from listf to rename all files in the list.")
 
@@ -71,7 +67,7 @@ renamef_recursive_arg = "Used with -a to include files in subfolders."
 # renamef -f
 # renamef -ar 'C:\Users\Public\Documents\'
 
-
+# ------------------------------ EXIT ------------------------------ #
 help_exit = r"""Usage: exit
 or: quit
 Exit the application.

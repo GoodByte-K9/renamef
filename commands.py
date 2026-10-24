@@ -1,4 +1,6 @@
-from texts import command_list, help_help, help_listf, help_summf, help_renamef, help_exit
+import argparse
+
+from texts import *
 from file_reader import list_files, read_file
 from renamer import rename_files
 from tool_results import Result
@@ -10,7 +12,7 @@ def _help(_help: bool = False):
     print(command_list)
 
 
-def listf(path: str, recursive: bool = False, save: bool = False):
+def listf(path: str, recursive: bool = False, save: bool = False) -> str | None:
     global paths_dict
 
     if not recursive:
@@ -40,6 +42,38 @@ def renamef(file_path: str = "", fetch: bool = False, _all: bool = False, recurs
 def _exit():
     ...
 
+
+def parse_arguments(command: list[str]):
+    args = parser.parse_args(command)
+    if args.command == "help":
+        commands["help"]()
+    elif args.command == "listf":
+        commands["listf"](path=args.path.strip('"'), recursive=args.recursive, save=args.save)
+    elif args.command == "summf":
+        ...
+
+
+parser = argparse.ArgumentParser(prog="")  # Empty string removes misguiding app name from help's "usage:" section
+subparsers = parser.add_subparsers(dest="command")
+
+help_parser = subparsers.add_parser("help", description="List available commands.")
+
+listf_parser = subparsers.add_parser("listf", description=help_listf)
+listf_parser.add_argument("path", metavar="PATH")
+listf_parser.add_argument("-r", "--recursive", action="store_true", help=listf_recursive_arg)
+listf_parser.add_argument("-s", "--save", action="store_true", help=listf_save_arg)
+
+summf_parser = subparsers.add_parser("summf", description=help_summf)
+summf_parser.add_argument("path", metavar="PATH")
+summf_parser.add_argument("-e", "--expand", action="store_true", help=summf_expand_arg)
+summf_parser.add_argument("-t", "--thinking", action="store_true", help=summf_thinking_arg)
+
+renamef_parser = subparsers.add_parser("renamef", description=help_renamef)
+renamef_parser.add_argument("path", metavar="PATH")
+renamef_parser.add_argument("new-name", metavar="NEW-NAME")
+renamef_parser.add_argument("-f", "--fetch", help=renamef_fetch_arg)
+renamef_parser.add_argument("-a", "--all", help=renamef_all_arg)
+renamef_parser.add_argument("-r", "--recursive", help=renamef_recursive_arg)
 
 commands = {
     "help": _help,

@@ -8,6 +8,8 @@ import psutil
 import requests
 from tqdm import tqdm
 
+from config import CONFIG
+
 INSTALLER_URLS = {
             "Windows": "https://ollama.com/download/OllamaSetup.exe",
             "Darwin": "https://ollama.com/download/Ollama.dmg"  # Darwin = Mac
@@ -62,8 +64,25 @@ def server() -> None:
         elif process_name.lower().startswith("ollama"):
             return None
 
-    subprocess.Popen(["ollama", "serve"])
+    logs_folder = Path(__name__).parent / "logs"
+    logs_folder.mkdir(parents=True, exist_ok=True)
+
+    with open("logs/ollama.log", "a", encoding="utf-8") as log:  # "a" = append
+        subprocess.Popen(["ollama", "serve"], stdout=log, stderr=log)
     return None
+
+
+def pull_model() -> None:
+    model = CONFIG["llm"]["model"]
+    process_show = subprocess.run(["ollama", "show", model], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+    if process_show.returncode != 0:
+        process_pull = subprocess.run(["ollama", "pull", model])
+
+        if process_pull.returncode != 0:
+            print(f"Exit code {process_pull.returncode}")
+            print("Failed to pull the model.\n"
+                  "Check your internet connection, firewall rules and model name in config file\n"
+                  "LLM features (summf, renamef with switches) are unavailable.")
 
 
 if __name__ == "__main__":

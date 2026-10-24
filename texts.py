@@ -20,7 +20,8 @@ install_confirmation = ("\nOllama is required for the app to work in its intende
 
 install_warning = "Ollama is required for the application to work. Exiting application..."
 
-command_list = """help - List available commands.
+command_list = """
+    help - List available commands.
     listf - List all files in a location .
     summf - Summarize file contents.
     renamef -  Rename a given file or files.
@@ -38,10 +39,11 @@ Example:
 help -h
 """
 
-help_listf = r"""List all files in a location. Only the following files are listed: 
-pdf, txt, md, png, jpeg, jpg, webp, gif.
-"""
-listf_recursive_arg = "List all files recursively from all subfolders in a given PATH."
+help_listf = r"""List all files in a location. PATH represents an absolute path of your choice.
+Only the following files are listed: pdf, txt, md, png, jpeg, jpg, webp, gif."""
+
+listf_recursive_arg = ("List all files recursively from all subfolders in a given 'PATH'."
+                       "Use quotation marks around the path.")
 listf_save_arg = "Save the result for LLM."
 # Usage: listf [OPTIONS] PATH
 # -r, --recursive               List all files recursively from all subfolders in a given PATH

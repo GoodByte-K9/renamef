@@ -4,7 +4,6 @@ import subprocess
 import platform
 import tempfile
 import psutil
-import shutil
 
 import requests
 from tqdm import tqdm
@@ -75,9 +74,15 @@ def server() -> None:
 
 def pull_model() -> None:
     model = CONFIG["llm"]["model"]
-    model_present = subprocess.Popen(["ollama", "show", model], stdout=subprocess.PIPE)
-    if str(model_present.communicate()).startswith("Error"):
-        subprocess.Popen(["ollama", "pull", model])
+    process_show = subprocess.run(["ollama", "show", model], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+    if process_show.returncode != 0:
+        process_pull = subprocess.run(["ollama", "pull", model])
+
+        if process_pull.returncode != 0:
+            print(f"Exit code {process_pull.returncode}")
+            print("Failed to pull the model.\n"
+                  "Check your internet connection, firewall rules and model name in config file\n"
+                  "LLM features (summf, renamef with switches) are unavailable.")
 
 
 if __name__ == "__main__":

@@ -8,6 +8,7 @@ the summary with no preface or departing words."""
 ""
 summf = """User requested a brief summary of the following document. Summarize it using your own words, answering the 
 question 'what is this document for?'. Avoid disclosing names, social security numbers, phone numbers or personally 
-identifiable information (PII). Avoid repetition in your description. Document path: """
+identifiable information (PII). Avoid repetition in your description. Don't include questions in your answer. 
+Document path: """
 summf_default = " Use read_file() with the given absolute_file_path"
 summf_expand = " Use read_file() with the given absolute_file_path and expand_context set to True."

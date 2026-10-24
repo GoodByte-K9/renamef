@@ -1,13 +1,21 @@
+import logging
 from pathlib import Path
 from typing import cast
+import contextlib
 import base64
 import os
+import io
 
 import pymupdf4llm
 import pymupdf
 
 from tool_results import Result
 from config import CONFIG
+
+# disabling pesky OCR warnings:
+pymupdf.set_messages(pylogging=True)  # sends messages to Python logging system instead of writing to the terminal
+# get the pymupdf logger and set its logging level to ERROR, so it only displays ERROR and CRITICAL messages
+logging.getLogger("pymupdf").setLevel(logging.ERROR)
 
 if CONFIG["ocr"]["tessdata"] not in ["tessdata", "default"]:
     os.environ["TESSDATA_PREFIX"] = CONFIG["ocr"]["tessdata"]
@@ -99,7 +107,10 @@ def read_file(absolute_file_path: str, expand_context: bool = False) -> Result:
         file_suffix = file_path.suffix.lower()
         if file_suffix == ".pdf":
             file_data.text = cast(
-                str, pymupdf4llm.to_markdown(file_path, ocr_language=CONFIG["ocr"]["languages"])[:char_limit])
+                str, pymupdf4llm.to_markdown(
+                    file_path,
+                    ocr_language=CONFIG["ocr"]["languages"]
+                )[:char_limit])
             if file_data.text == "":
                 doc = pymupdf.open(file_path)
                 pages = 1 if expand_context is False else len(doc)

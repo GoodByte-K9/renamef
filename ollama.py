@@ -41,10 +41,10 @@ def download_installer(url: str) -> Path | None:
 
 
 def install() -> None:
-    url = INSTALLER_URLS.get(platform.system())  # get() returns None if retrieved OS name not in dict
     _os = platform.system()
+    url = INSTALLER_URLS.get(_os)  # get() returns None if OS is not Windows or Mac
     if url is None:
-        print("Automatic installation not supported on Linux. Run the following command to install Ollama:"
+        print("Automatic installation not supported for Linux. Run the following command to install Ollama:"
               f"\n{LINUX_COMMAND}")
         return
 
@@ -56,26 +56,32 @@ def install() -> None:
         subprocess.run(["open", str(installer)])
 
 
-def server() -> None:
+def server() -> subprocess.Popen | None:
+    print("checking if ollama server is running...")
     for process in psutil.process_iter(["name"]):  # run through all active processes
         process_name = process.info["name"]
         if process_name is None:
             continue
         elif process_name.lower().startswith("ollama"):
+            print("server is up and running...")
             return None
 
     logs_folder = Path(__name__).parent / "logs"
     logs_folder.mkdir(parents=True, exist_ok=True)
 
     with open("logs/ollama.log", "a", encoding="utf-8") as log:  # "a" = append
-        subprocess.Popen(["ollama", "serve"], stdout=log, stderr=log)
-    return None
+        print("no server process found, launching ollama...")
+        ollama_server = subprocess.Popen(["ollama", "serve"], stdout=log, stderr=log)
+        print("ollama is running...")
+    return ollama_server
 
 
 def pull_model() -> None:
     model = CONFIG["llm"]["model"]
+    print(f"checking if {model} is available...")
     process_show = subprocess.run(["ollama", "show", model], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
     if process_show.returncode != 0:
+        print(f"{model} not available. Initiating download...")
         process_pull = subprocess.run(["ollama", "pull", model])
 
         if process_pull.returncode != 0:
@@ -83,6 +89,8 @@ def pull_model() -> None:
             print("Failed to pull the model.\n"
                   "Check your internet connection, firewall rules and model name in config file\n"
                   "LLM features (summf, renamef with switches) are unavailable.")
+    else:
+        print("model is available, welcoming user...")
 
 
 if __name__ == "__main__":

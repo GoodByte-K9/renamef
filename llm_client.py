@@ -10,9 +10,9 @@ from config import CONFIG
 
 
 class Assistant:
-    def __init__(self):
+    def __init__(self, thinking: bool = False):
         self.model = CONFIG["llm"]["model"]
-        self.reasoning_effort = "medium"
+        self.reasoning_effort = "none" if thinking is False else "medium"
         self.history: list = [{"role": "system", "content": system_instruction}]
         self.openrouter = OpenAI(base_url="http://127.0.0.1:11434/v1", api_key="ollama")
         self.tools = [
@@ -39,6 +39,7 @@ class Assistant:
             tool_result = Assistant.dispatcher(msg_4_tool)
             self.history.append(msg_4_tool)
             self.history.extend(tool_result)
+            messages = self.history
             response = self.openrouter.chat.completions.create(
                 model=self.model,
                 messages=messages,
@@ -50,7 +51,6 @@ class Assistant:
 
     @staticmethod
     def dispatcher(llm_msg) -> list[dict] | str:
-
         def tool_response(content, tool_id):
             return [{"role": "tool", "content": content, "tool_call_id": tool_id}]
 

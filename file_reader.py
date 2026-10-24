@@ -132,7 +132,7 @@ read_file_function = {
     "parameters": {
         "type": "object",
         "properties": {
-            "folder_path": {
+            "absolute_file_path": {
                 "type": "string",
                 "description": "The full absolute path where pdf(s) reside. If the path ends with a file name, only"
                                "that one file is read."

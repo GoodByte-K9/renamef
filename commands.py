@@ -52,7 +52,20 @@ def summf(file_path: str, expand: bool = False, thinking: bool = False) -> None:
 
 
 def renamef(file_path: str = "", new_name: str = "", fetch: bool = False, _all: bool = False, recursive: bool = False):
-    ...
+    def extract_results(result: Result):
+        text: str = result.text
+        change_log: list = result.change_log
+        return text, change_log
+
+    if file_path and new_name:
+        file_to_rename = [{"original_path": file_path, "new_name": new_name}]
+        # rename the file and extract results
+        r_text, r_change_log = extract_results(rename_files(file_to_rename, llm=False))
+        log_str = "\n".join(r_change_log)
+
+        rnm_reply = r_text if not None else log_str
+        print(rnm_reply)
+        return
 
 
 def _exit():
@@ -70,7 +83,7 @@ def parse_arguments(command: list[str]) -> None:
     elif args.command == "renamef":
         if args.recursive and args.all is False:
             renamef_parser.error("'--recursive' only works with '--all'")  # Exits function because it raises SystemExit
-        commands["renamef"](file_path=args.path.strip('"'), new_name=args.new_name, fetch=args.fetch,
+        commands["renamef"](file_path=args.path.strip('"'), new_name=args.new_name.strip('"'), fetch=args.fetch,
                             _all=args.all, recursive=args.recursive)
     elif args.command == "exit":
         ...

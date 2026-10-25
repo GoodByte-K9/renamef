@@ -1,5 +1,7 @@
+import json
 import argparse
 import subprocess
+from dataclasses import asdict
 
 from file_reader import list_files, read_file
 from renamer import rename_files
@@ -51,12 +53,18 @@ def summf(file_path: str, expand: bool = False, thinking: bool = False) -> None:
         stderr=subprocess.DEVNULL)
 
 
-def renamef(file_path: str = "", new_name: str = "", fetch: bool = False, _all: bool = False, recursive: bool = False):
+def renamef(file_path: str | None = "",
+            new_name: str | None = "",
+            fetch: bool = False,
+            _all: bool = False,
+            recursive: bool = False) -> None:
+
     def extract_results(result: Result):
         text: str = result.text
         change_log: list = result.change_log
         return text, change_log
 
+    # User initiated file renaming
     if file_path and new_name:
         file_to_rename = [{"original_path": file_path, "new_name": new_name}]
         # rename the file and extract results
@@ -66,6 +74,46 @@ def renamef(file_path: str = "", new_name: str = "", fetch: bool = False, _all: 
         rnm_reply = r_text if not None else log_str
         print(rnm_reply)
         return
+
+    file_list = None
+
+    if fetch and file_path is None and new_name is None:
+        fetch = fetch if any(paths_dict.values()) else False  # fetch_dict can only be True if paths_dict is not empty
+        if fetch is False:
+            print("Error: Failed to fetch file list. File list was empty...")
+            return
+        else:
+            file_list = json.dumps(paths_dict)
+
+    # LLM initiated file renaming
+    if _all and file_path:
+        file_list = json.dumps(asdict(list_files(file_path, recursive)))  # Result -> Dict -> JSON
+
+    if file_list is not None:
+        llm = Assistant()
+        llm.chat(prompts.renamef_default + "PUT THE FILE NAME FROM THE LOOP HERE")
+
+
+# Generate new Assistant object and loop across the whole list, one by one, asking the LLM to rename the file.
+# this resets the context window, while also giving specific instructions (next file to check in loop) to the LLM, so
+# no memory is even needed.
+
+# _all workflow
+# - Get a list of files programmatically to save context memory
+# - Create a loop that iterates n number of times based on number of values in file_list
+# - Initiate LLM...
+
+# 1. System -> instructions
+# 2. User -> rename a specific file (item from the loop)
+# 3. Assistant -> call read_file()
+# 4. Tool -> returns file text
+# 5. Assistant -> call rename_files() on that 1 file
+# 6. Tool -> renames the file
+# 7. Assistant -> Returns logs to user
+
+# Rinse and repeat until loop is done
+# Requires moving user confirmation away from rename_files...
+# TODO: Move user confirmation message from rename_files()
 
 
 def _exit():
@@ -105,7 +153,7 @@ summf_parser.add_argument("-e", "--expand", action="store_true", help=summf_expa
 summf_parser.add_argument("-t", "--thinking", action="store_true", help=summf_thinking_arg)
 
 renamef_parser = subparsers.add_parser("renamef", description=help_renamef)
-renamef_parser.add_argument("path", metavar="PATH")
+renamef_parser.add_argument("path", metavar="PATH", nargs="?")
 excl_renamef_args = renamef_parser.add_mutually_exclusive_group()
 excl_renamef_args.add_argument("new_name", metavar="NEW_NAME", nargs="?")  # value=None if left empty
 excl_renamef_args.add_argument("-f", "--fetch", action="store_true", help=renamef_fetch_arg)

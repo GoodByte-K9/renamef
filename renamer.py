@@ -102,6 +102,11 @@ rename_files_function = {
     },
 }
 
+
+def store_plan():
+    ...
+
+
 if __name__ == "__main__":
     rename_plan = [
         {

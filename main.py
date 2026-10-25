@@ -27,10 +27,9 @@ if ollama_path is None:
             print("Invalid answer...")
 
 ollama_server = ollama.server()  # TODO: Use ollama_server.terminate() to quit the program
-ollama.pull_model()  # TODO: pulling causes massive spam of progress bars in the chat, otherwise seems to work well
+ollama.pull_model()
 print(f"{texts.art}\n{texts.welcome}")
 
-# TODO: Remove the "Document parser messages" when using OCR to read documents
 # Must specify POSIX for shlex, lest it fail at reading paths with backslashes
 is_posix = False if platform.system() == "Windows" else True
 while running:

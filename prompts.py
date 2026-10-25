@@ -15,8 +15,8 @@ summf_expand = " Use read_file() with the given absolute_file_path and expand_co
 
 # ------------------------------------ RENAMEF ------------------------------------ #
 renamef_default = """User requested to rename one file based on its contents. Use the read_file tool to read the file 
-and then rename the file with the rename_files tool based on the file's contents. If the file is linked to a company or 
-institution, mention it in the file name, e.g. 'Microsoft_contract.pdf'. The file name can have a maximum of 
-40 characters, file suffix included. Do NOT use the personal names of people in file names. Here's the file to be 
-renamed: 
-"""
+and then rename the file with the rename_files tool based on the file's contents. If the file contents speak of a 
+company or institution, mention it in the file name, e.g. 'Microsoft_contract.pdf'. The file name can have a maximum of 
+40 characters, file suffix included. Do NOT use the personal names of people in file names. Once you have renamed the 
+file, simply respond: 'File name changed from <old_name> to <new_name>...', and nothing else. 
+Here's the file to be renamed: """

@@ -15,12 +15,13 @@ art = r"""
 welcome = """Welcome to File Renamer. Does what it says on the tin. LLM-powered for context comprehension.
 Type "help" for commands."""
 
-install_confirmation = ("\nOllama is required for the app to work in its intended way.\n"
+install_confirmation = ("\nNo installation found. Ollama is required for the app to work in its intended way.\n"
                         "Download and install Ollama now? (yes/no)\n")
 
 install_warning = "Ollama is required for the application to work. Exiting application..."
 
-command_list = """
+# ------------------------------ HELP ------------------------------ #
+help_command_list = """
     help - List available commands.
     listf - List all files in a location.
     summf - Summarize file contents.
@@ -30,39 +31,36 @@ command_list = """
     Run <command> --help for more details.
     """
 
-help_help = r"""Usage: help [OPTIONS]
-List available commands.
+# ------------------------------ LISTF ------------------------------ #
+help_listf = r"""List all files in a location. PATH represents an absolute file path of your choice. Wrap the path in 
+double quotes ("") when writing the command. Only the following files will be listed: 
+pdf, txt, md, png, jpeg, jpg, webp, gif."""
 
--h, --help                    Show details of the help command.
-
-Example:
-help -h
-"""
-
-help_listf = r"""List all files in a location. PATH represents an absolute path of your choice.
-Only the following files are listed: pdf, txt, md, png, jpeg, jpg, webp, gif."""
-
-listf_recursive_arg = ("List all files recursively from all subfolders in a given 'PATH'."
-                       "Use quotation marks around the path.")
+listf_recursive_arg = """List all files recursively from all subfolders in a given "PATH".
+Use quotation marks around the path."""
 
 listf_save_arg = "Save the result for LLM."
 # listf -rs 'C:\Users\Public\Documents'
 
-help_summf = ("Instruct an LLM to read a file and summarize it for you. Only the following files are supported:\n"
-              "pdf, txt, md, png, jpeg, jpg, webp, gif. Thinking is off by default.")
+# ------------------------------ SUMMF ------------------------------ #
+help_summf = """Instruct an LLM to read a file and summarize it for you. Attempts to exclude personally identifiable
+information. Thinking off by default. PATH represents an absolute file path of your choice. Wrap the path in double 
+quotes ("") when writing the command. Only the following files are supported: pdf, txt, md, png, jpeg, jpg, webp, gif."""
 
-summf_expand_arg = ("Increase the amount of text the LLM reads from pdf, txt, and md files."
-                    "This option slows down the process.")
+summf_expand_arg = """Increase the amount of content the LLM reads from pdf, txt, and md files to help with context
+comprehension. This option may slow down the process."""
 
-summf_thinking_arg = "Enable thinking for the model. This option slows down the process."
+summf_thinking_arg = "Enable thinking for the model. This option may slow down the process."
 
 # Examples:
 # summarize -et 'C:\Users\Public\Documents\cryptic_secrets.txt'
 
-help_renamef = ("Instruct an LLM to rename a given file based on file context. Give a path to a file, or load the "
-                "results from listf to rename all files in the list.")
+# ------------------------------ RENAMEF ------------------------------ #
+help_renamef = """Instruct an LLM to rename a given file based on file context. Give a PATH to a file, or load the
+results from listf to rename all files in the list. PATH represents an absolute file path of your choice. Wrap the path 
+in double quotes ("") when writing the command"""
 
-renamef_fetch_arg = "Fetch a file list from previously run listf to LLM. Renames all files in the list."
+renamef_fetch_arg = "Fetch a file list from previously run listf -s to the LLM. Renames all files in the list."
 renamef_all_arg = "Rename all files in a given folder based on file context."
 renamef_recursive_arg = "Used with -a to include files in subfolders."
 
@@ -71,7 +69,7 @@ renamef_recursive_arg = "Used with -a to include files in subfolders."
 # renamef -f
 # renamef -ar 'C:\Users\Public\Documents\'
 
-
+# ------------------------------ EXIT ------------------------------ #
 help_exit = r"""Usage: exit
 or: quit
 Exit the application.

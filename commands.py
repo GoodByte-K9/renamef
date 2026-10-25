@@ -1,15 +1,19 @@
 import argparse
+import subprocess
 
-from texts import *
 from file_reader import list_files, read_file
 from renamer import rename_files
+from llm_client import Assistant
 from tool_results import Result
+from config import CONFIG
+from texts import *
+import prompts
 
 paths_dict: dict[str, list] = {}
 
 
 def _help(_help: bool = False):
-    print(command_list)
+    print(help_command_list)
 
 
 def listf(path: str, recursive: bool = False, save: bool = False) -> str | None:
@@ -24,15 +28,27 @@ def listf(path: str, recursive: bool = False, save: bool = False) -> str | None:
         return None
     if save:
         paths_dict = list_result.paths
-
     for key in list_result.paths:
         for item in list_result.paths[key]:
             print(item)
     return None
 
 
-def summf(file_path: str, expand: bool = False, thinking: bool = False):
-    ...
+def summf(file_path: str, expand: bool = False, thinking: bool = False) -> None:
+    llm = Assistant(thinking=thinking)
+    instruction_seed: str = prompts.summf + file_path
+    if expand:
+        instruction = instruction_seed + prompts.summf_expand
+    else:
+        instruction = instruction_seed + prompts.summf_default
+
+    print("Reading the document and contriving a summary...")
+    response = llm.chat(instruction)
+    print(response)
+    subprocess.Popen(
+        ["ollama", "stop", CONFIG["llm"]["model"]],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL)
 
 
 def renamef(file_path: str = "", fetch: bool = False, _all: bool = False, recursive: bool = False):
@@ -50,7 +66,7 @@ def parse_arguments(command: list[str]):
     elif args.command == "listf":
         commands["listf"](path=args.path.strip('"'), recursive=args.recursive, save=args.save)
     elif args.command == "summf":
-        ...
+        commands["summf"](file_path=args.path.strip('"'), expand=args.expand, thinking=args.thinking)
 
 
 parser = argparse.ArgumentParser(prog="")  # Empty string removes misguiding app name from help's "usage:" section

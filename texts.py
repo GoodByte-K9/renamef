@@ -58,7 +58,7 @@ summf_thinking_arg = "Enable thinking for the model. This option may slow down t
 # ------------------------------ RENAMEF ------------------------------ #
 help_renamef = """Instruct an LLM to rename a given file based on file context. Give a PATH to a file, or load the
 results from listf to rename all files in the list. PATH represents an absolute file path of your choice. Wrap the path 
-in double quotes ("") when writing the command"""
+in double quotes ("") when writing the command."""
 
 renamef_fetch_arg = "Fetch a file list from previously run listf -s to the LLM. Renames all files in the list."
 renamef_all_arg = "Rename all files in a given folder based on file context."

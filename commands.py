@@ -51,7 +51,7 @@ def summf(file_path: str, expand: bool = False, thinking: bool = False) -> None:
         stderr=subprocess.DEVNULL)
 
 
-def renamef(file_path: str = "", fetch: bool = False, _all: bool = False, recursive: bool = False):
+def renamef(file_path: str = "", new_name: str = "", fetch: bool = False, _all: bool = False, recursive: bool = False):
     ...
 
 
@@ -59,7 +59,7 @@ def _exit():
     ...
 
 
-def parse_arguments(command: list[str]):
+def parse_arguments(command: list[str]) -> None:
     args = parser.parse_args(command)
     if args.command == "help":
         commands["help"]()
@@ -67,6 +67,13 @@ def parse_arguments(command: list[str]):
         commands["listf"](path=args.path.strip('"'), recursive=args.recursive, save=args.save)
     elif args.command == "summf":
         commands["summf"](file_path=args.path.strip('"'), expand=args.expand, thinking=args.thinking)
+    elif args.command == "renamef":
+        if args.recursive and args.all is False:
+            renamef_parser.error("'--recursive' only works with '--all'")  # Exits function because it raises SystemExit
+        commands["renamef"](file_path=args.path.strip('"'), new_name=args.new_name, fetch=args.fetch,
+                            _all=args.all, recursive=args.recursive)
+    elif args.command == "exit":
+        ...
 
 
 parser = argparse.ArgumentParser(prog="")  # Empty string removes misguiding app name from help's "usage:" section
@@ -86,10 +93,11 @@ summf_parser.add_argument("-t", "--thinking", action="store_true", help=summf_th
 
 renamef_parser = subparsers.add_parser("renamef", description=help_renamef)
 renamef_parser.add_argument("path", metavar="PATH")
-renamef_parser.add_argument("new-name", metavar="NEW-NAME")
-renamef_parser.add_argument("-f", "--fetch", help=renamef_fetch_arg)
-renamef_parser.add_argument("-a", "--all", help=renamef_all_arg)
-renamef_parser.add_argument("-r", "--recursive", help=renamef_recursive_arg)
+renamef_parser.add_argument("new_name", metavar="NEW_NAME", nargs="?")  # value=None if left empty
+solitary_fetch = renamef_parser.add_mutually_exclusive_group()
+solitary_fetch.add_argument("-f", "--fetch", action="store_true", help=renamef_fetch_arg)
+solitary_fetch.add_argument("-a", "--all", action="store_true", help=renamef_all_arg)
+renamef_parser.add_argument("-r", "--recursive", action="store_true", help=renamef_recursive_arg)
 
 commands = {
     "help": _help,

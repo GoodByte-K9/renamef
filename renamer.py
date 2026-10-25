@@ -3,7 +3,7 @@ from pathlib import Path
 from tool_results import Result
 
 
-def rename_files(rename_plan: list[dict[str, str]]) -> Result:
+def rename_files(rename_plan: list[dict[str, str]], llm: bool = True) -> Result:
     # rename_plan example:
     # [{"original_path": "C:\\Users\\sethg\\Desktop\\tests\\12345678.PDF", "new_name": "power_of_attorney.pdf"}]
     # Each name must be unique relative to each other
@@ -26,7 +26,8 @@ def rename_files(rename_plan: list[dict[str, str]]) -> Result:
 
         print(f"Original file: {Path(full_path)}  |  New file name: {new_name}")
 
-    while True:
+    # If the user of the function is the LLM, confirm changes from the user
+    while llm:
         user_confirmation = input("Confirm the changes? (yes/no)\n")
         if user_confirmation.lower() in ["yes", "y"]:
             print("Renaming plan accepted. Proceeding to execute the plan...")
@@ -61,6 +62,7 @@ def rename_files(rename_plan: list[dict[str, str]]) -> Result:
     change_log[0] = f"Successes: {successes}"
     change_log[1] = f"Failures: {failures}"
     file_data.change_log = change_log
+    print("Process finished.")
     return file_data
 
 

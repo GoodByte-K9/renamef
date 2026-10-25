@@ -93,10 +93,10 @@ summf_parser.add_argument("-t", "--thinking", action="store_true", help=summf_th
 
 renamef_parser = subparsers.add_parser("renamef", description=help_renamef)
 renamef_parser.add_argument("path", metavar="PATH")
-renamef_parser.add_argument("new_name", metavar="NEW_NAME", nargs="?")  # value=None if left empty
-solitary_fetch = renamef_parser.add_mutually_exclusive_group()
-solitary_fetch.add_argument("-f", "--fetch", action="store_true", help=renamef_fetch_arg)
-solitary_fetch.add_argument("-a", "--all", action="store_true", help=renamef_all_arg)
+excl_renamef_args = renamef_parser.add_mutually_exclusive_group()
+excl_renamef_args.add_argument("new_name", metavar="NEW_NAME", nargs="?")  # value=None if left empty
+excl_renamef_args.add_argument("-f", "--fetch", action="store_true", help=renamef_fetch_arg)
+excl_renamef_args.add_argument("-a", "--all", action="store_true", help=renamef_all_arg)
 renamef_parser.add_argument("-r", "--recursive", action="store_true", help=renamef_recursive_arg)
 
 commands = {

@@ -14,6 +14,13 @@ import prompts
 paths_dict: dict[str, list] = {}
 
 
+def stop_model():
+    subprocess.Popen(
+        ["ollama", "stop", CONFIG["llm"]["model"]],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL)
+
+
 def _help(_help: bool = False):
     print(help_command_list)
 
@@ -47,14 +54,11 @@ def summf(file_path: str, expand: bool = False, thinking: bool = False) -> None:
     print("Reading the document and contriving a summary...")
     response = llm.chat(instruction)
     print(response)
-    subprocess.Popen(
-        ["ollama", "stop", CONFIG["llm"]["model"]],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL)
+    stop_model()
 
 
-def renamef(file_path: str | None = "",
-            new_name: str | None = "",
+def renamef(file_path: str | None,
+            new_name: str | None,
             fetch: bool = False,
             _all: bool = False,
             recursive: bool = False) -> None:
@@ -64,11 +68,44 @@ def renamef(file_path: str | None = "",
         change_log: list = result.change_log
         return text, change_log
 
+    def green_light(dict_of_files: dict[str, list]) -> bool:
+        file_counter = 0
+        listed_files = 0
+        print_limit = 20
+        file_scan_limit = print_limit + 200
+        print(f"Following files will be renamed based on their content:\n")
+        for a_list in dict_of_files.values():
+            for a_file in a_list:
+                if file_counter <= print_limit:
+                    print({a_file})
+                    listed_files += 1
+                file_counter += 1
+                if file_counter > file_scan_limit:
+                    break
+            if file_counter > file_scan_limit:
+                break
+        if file_counter > file_scan_limit:
+            print(f"+ over {file_counter - listed_files} files to rename... This might take a while")
+        elif file_counter <= listed_files:
+            pass
+        else:
+            print(f"+ {file_counter - listed_files} files to rename.")
+        while True:
+            user_confirmation = input("Do you wish to proceed? (yes/no)\n")
+            if user_confirmation.lower() in ["yes", "y"]:
+                print("List accepted. Proceeding to execute the plan...")
+                return True
+            elif user_confirmation.lower() == ["no", "n"]:
+                print("Process interrupted...")
+                return False
+            else:
+                print("Warning: Only a yes/y or a no/n is accepted as an answer.")
+
     # User initiated file renaming
     if file_path and new_name:
-        file_to_rename = [{"original_path": file_path, "new_name": new_name}]
+        file_to_rename = [{"original_path": file_path.strip('"'), "new_name": new_name}]
         # rename the file and extract results
-        r_text, r_change_log = extract_results(rename_files(file_to_rename, llm=False))
+        r_text, r_change_log = extract_results(rename_files(file_to_rename))
         log_str = "\n".join(r_change_log)
 
         rnm_reply = r_text if not None else log_str
@@ -83,20 +120,21 @@ def renamef(file_path: str | None = "",
             print("Error: Failed to fetch file list. File list was empty...")
             return
         else:
-            file_list = json.dumps(paths_dict)
+            file_list = paths_dict
 
-    # LLM initiated file renaming
-    if _all and file_path:
-        file_list = json.dumps(asdict(list_files(file_path, recursive)))  # Result -> Dict -> JSON
+    if _all and file_path or file_path and new_name is None and not any([_all, fetch]):
+        file_list = list_files(file_path.strip('"'), recursive).paths  # Result -> Dict
 
     if file_list is not None:
-        llm = Assistant()
-        llm.chat(prompts.renamef_default + "PUT THE FILE NAME FROM THE LOOP HERE")
+        if not green_light(file_list):  # Confirm from user whether the list of files should be renamed
+            return
+        llm = Assistant()  # Left outside the loop so a new API client is not created on each iteration -> shaves time
+        for _list in file_list.values():
+            for file in _list:
+                llm.chat(prompts.renamef_default + file)
+                llm.reset_history()  # Clear so context window doesn't get out of hand
 
-
-# Generate new Assistant object and loop across the whole list, one by one, asking the LLM to rename the file.
-# this resets the context window, while also giving specific instructions (next file to check in loop) to the LLM, so
-# no memory is even needed.
+    stop_model()
 
 # _all workflow
 # - Get a list of files programmatically to save context memory
@@ -113,7 +151,6 @@ def renamef(file_path: str | None = "",
 
 # Rinse and repeat until loop is done
 # Requires moving user confirmation away from rename_files...
-# TODO: Move user confirmation message from rename_files()
 
 
 def _exit():
@@ -131,7 +168,7 @@ def parse_arguments(command: list[str]) -> None:
     elif args.command == "renamef":
         if args.recursive and args.all is False:
             renamef_parser.error("'--recursive' only works with '--all'")  # Exits function because it raises SystemExit
-        commands["renamef"](file_path=args.path.strip('"'), new_name=args.new_name.strip('"'), fetch=args.fetch,
+        commands["renamef"](file_path=args.path, new_name=args.new_name, fetch=args.fetch,
                             _all=args.all, recursive=args.recursive)
     elif args.command == "exit":
         ...

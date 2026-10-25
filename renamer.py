@@ -3,10 +3,9 @@ from pathlib import Path
 from tool_results import Result
 
 
-def rename_files(rename_plan: list[dict[str, str]], llm: bool = True) -> Result:
+def rename_files(rename_plan: list[dict[str, str]]) -> Result:
     # rename_plan example:
     # [{"original_path": "C:\\Users\\Public\\Public Documents\\12345678.PDF", "new_name": "deepest_secrets.pdf"}]
-    # Each name must be unique relative to each other
     file_data = Result()
     change_log = ["Successes: 0", "Failures: 0"]
     successes = 0
@@ -20,24 +19,6 @@ def rename_files(rename_plan: list[dict[str, str]], llm: bool = True) -> Result:
         if any(character in new_name for character in forbidden_characters):
             file_data.text = f"Error: Process interrupted. File name {new_name} contains illegal symbols or characters."
             return file_data
-
-        # Confirm the LLM-initiated renaming plan from the user
-        if llm:
-            print(f"Tool call initiated by Assistant. Review requested changes:\n")
-            print(f"Original file: {Path(full_path)}  |  New file name: {new_name}")
-
-    # If the user of the function is an LLM, confirm changes from the user
-    while llm:
-        user_confirmation = input("Confirm the changes? (yes/no)\n")
-        if user_confirmation.lower() in ["yes", "y"]:
-            print("Renaming plan accepted. Proceeding to execute the plan...")
-            break
-        elif user_confirmation.lower() == ["no", "n"]:
-            print("Process interrupted. Informing Assistant of rejected plan.")
-            file_data.text = "User rejected renaming plan."
-            return file_data
-        else:
-            print("Warning: Only a yes/y or a no/n is accepted as an answer.")
 
     # Execute the renaming plan
     for dictionary in rename_plan:
@@ -101,11 +82,6 @@ rename_files_function = {
         "additionalProperties": False,
     },
 }
-
-
-def store_plan():
-    ...
-
 
 if __name__ == "__main__":
     rename_plan = [

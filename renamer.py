@@ -43,7 +43,6 @@ def rename_files(rename_plan: list[dict[str, str]]) -> Result:
     change_log[0] = f"Successes: {successes}"
     change_log[1] = f"Failures: {failures}"
     file_data.change_log = change_log
-    print("Process finished.")
     return file_data
 
 

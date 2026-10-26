@@ -1,7 +1,6 @@
-import json
 import argparse
 import subprocess
-from dataclasses import asdict
+from pathlib import Path
 
 from file_reader import list_files, read_file
 from renamer import rename_files
@@ -60,7 +59,6 @@ def summf(file_path: str, expand: bool = False, thinking: bool = False) -> None:
 def renamef(file_path: str | None,
             new_name: str | None,
             fetch: bool = False,
-            _all: bool = False,
             recursive: bool = False) -> None:
 
     def extract_results(result: Result):
@@ -122,35 +120,24 @@ def renamef(file_path: str | None,
         else:
             file_list = paths_dict
 
-    if _all and file_path or file_path and new_name is None and not any([_all, fetch]):
-        file_list = list_files(file_path.strip('"'), recursive).paths  # Result -> Dict
+    if file_path or file_path and new_name is None and not fetch:
+        if Path(file_path.strip('"')).is_file():
+            file_list = {"specific_file": [file_path]}
+        else:
+            file_list = list_files(file_path.strip('"'), recursive).paths  # Result -> Dict
 
     if file_list is not None:
         if not green_light(file_list):  # Confirm from user whether the list of files should be renamed
             return
+        print("Initiating task...")
         llm = Assistant()  # Left outside the loop so a new API client is not created on each iteration -> shaves time
+        print("Changes will be listed below: ")
         for _list in file_list.values():
             for file in _list:
-                llm.chat(prompts.renamef_default + file)
+                print(llm.chat(prompts.renamef_default + file))
                 llm.reset_history()  # Clear so context window doesn't get out of hand
 
     stop_model()
-
-# _all workflow
-# - Get a list of files programmatically to save context memory
-# - Create a loop that iterates n number of times based on number of values in file_list
-# - Initiate LLM...
-
-# 1. System -> instructions
-# 2. User -> rename a specific file (item from the loop)
-# 3. Assistant -> call read_file()
-# 4. Tool -> returns file text
-# 5. Assistant -> call rename_files() on that 1 file
-# 6. Tool -> renames the file
-# 7. Assistant -> Returns logs to user
-
-# Rinse and repeat until loop is done
-# Requires moving user confirmation away from rename_files...
 
 
 def _exit():
@@ -167,9 +154,8 @@ def parse_arguments(command: list[str]) -> None:
         commands["summf"](file_path=args.path.strip('"'), expand=args.expand, thinking=args.thinking)
     elif args.command == "renamef":
         if args.recursive and args.all is False:
-            renamef_parser.error("'--recursive' only works with '--all'")  # Exits function because it raises SystemExit
-        commands["renamef"](file_path=args.path, new_name=args.new_name, fetch=args.fetch,
-                            _all=args.all, recursive=args.recursive)
+            renamef_parser.error("'--recursive' only works with ...")  # Exits function because it raises SystemExit
+        commands["renamef"](file_path=args.path, new_name=args.new_name, fetch=args.fetch, recursive=args.recursive)
     elif args.command == "exit":
         ...
 
@@ -194,8 +180,7 @@ renamef_parser.add_argument("path", metavar="PATH", nargs="?")
 excl_renamef_args = renamef_parser.add_mutually_exclusive_group()
 excl_renamef_args.add_argument("new_name", metavar="NEW_NAME", nargs="?")  # value=None if left empty
 excl_renamef_args.add_argument("-f", "--fetch", action="store_true", help=renamef_fetch_arg)
-excl_renamef_args.add_argument("-a", "--all", action="store_true", help=renamef_all_arg)
-renamef_parser.add_argument("-r", "--recursive", action="store_true", help=renamef_recursive_arg)
+excl_renamef_args.add_argument("-r", "--recursive", action="store_true", help=renamef_recursive_arg)
 
 commands = {
     "help": _help,

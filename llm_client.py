@@ -38,9 +38,9 @@ class Assistant:
         while response.choices[0].finish_reason == "tool_calls":
             msg_4_tool = response.choices[0].message  # "message" holds the "role", "content", and "tool_calls" keys
             tool_result = Assistant.dispatcher(msg_4_tool)
-            self.history.append(msg_4_tool)
-            self.history.extend(tool_result)
-            messages = self.history
+            messages.append(msg_4_tool)
+            messages.extend(tool_result)
+            self.history = messages
             response = self.openrouter.chat.completions.create(
                 model=self.model,
                 messages=messages,

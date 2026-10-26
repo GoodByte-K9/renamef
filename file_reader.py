@@ -154,7 +154,7 @@ read_file_function = {
                                "pdf. Use only when you lack enough context to understand the document."
             }
         },
-        "required": ["folder_path"],
+        "required": ["absolute_file_path"],
         "additionalProperties": False
     }
 }

@@ -67,34 +67,24 @@ def renamef(file_path: str | None,
         change_log: list = result.change_log
         return text, change_log
 
-    def green_light(dict_of_files: dict[str, list]) -> bool:
-        file_counter = 0
-        listed_files = 0
-        print_limit = 20
-        file_scan_limit = print_limit + 200
-        print(f"Following files will be renamed based on their content:\n")
-        for a_list in dict_of_files.values():
-            for a_file in a_list:
-                if file_counter <= print_limit:
-                    print({a_file})
-                    listed_files += 1
-                file_counter += 1
-                if file_counter > file_scan_limit:
-                    break
-            if file_counter > file_scan_limit:
-                break
-        if file_counter > file_scan_limit:
-            print(f"+ over {file_counter - listed_files} files to rename... This might take a while")
-        elif file_counter <= listed_files:
-            pass
-        else:
-            print(f"+ {file_counter - listed_files} files to rename.")
+    def green_light(dict_of_files: dict[str, list], number_of_files: int) -> bool:
+        display_length = 20
+        displayed_files = [item for _list in dict_of_files.values() for item in _list][:display_length]
+        actual_length = number_of_files
+
+        print(f"Following files will be renamed based on their content:")
+        for file in displayed_files:
+            print(file)
+
+        if actual_length > display_length:
+            print(f"+ {actual_length - len(displayed_files)} files to rename...")
+
         while True:
-            user_confirmation = input("Do you wish to proceed? (yes/no)\n")
-            if user_confirmation.lower() in ["yes", "y"]:
+            user_confirmation = input("Do you wish to proceed? (yes/no)\n").strip().lower()
+            if user_confirmation in ["yes", "y"]:
                 print("List accepted. Proceeding to execute the plan...")
                 return True
-            elif user_confirmation.lower() == ["no", "n"]:
+            elif user_confirmation in ["no", "n"]:
                 print("Process interrupted...")
                 return False
             else:
@@ -129,12 +119,12 @@ def renamef(file_path: str | None,
             file_list = list_files(file_path.strip('"'), recursive).paths  # Result -> Dict
 
     if file_list is not None:
-        if not green_light(file_list):  # Confirm from user whether the list of files should be renamed
+        nr_of_files = sum(len(_list) for _list in file_list.values())
+        if not green_light(file_list, nr_of_files):  # Confirm from user whether the list of files should be renamed
             return
         print("Initiating task...")
         llm = Assistant(thinking)  # Left outside loop so a new API client is not created each iteration -> shaves time
         print("Changes will be listed below: ")
-        nr_of_files = sum(len(_list) for _list in file_list.values())
         counter = 0
         for _list in file_list.values():
             for file in _list:
@@ -142,6 +132,7 @@ def renamef(file_path: str | None,
                 print(f"Renamed file {counter}/{nr_of_files}\n{llm.chat(prompts.renamef_default + file)}")
                 llm.reset_history()  # Clear so context window doesn't get out of hand
         paths_dict = {}  # Reset paths dict after name changes, as old entries cannot be reused
+        print("Task finished.")
 
     stop_model()
 
@@ -160,7 +151,10 @@ def parse_arguments(command: list[str]) -> None:
         commands["summf"](file_path=args.path.strip('"'), expand=args.expand, thinking=args.thinking)
     elif args.command == "renamef":
         if args.recursive and args.new_name is True:
-            renamef_parser.error('"-r" cannot be used with "NEW_NAME"')  # Exits function because it raises SystemExit
+            # Exits function because it raises SystemExit
+            renamef_parser.error('argument -r/--recursive: not allowed with argument "NEW_NAME"')
+        if args.path and args.fetch or args.new_name and args.fetch:
+            renamef_parser.error('argument -f/--fetch: not allowed with arguments "PATH" or "NEW_NAME"')
         commands["renamef"](file_path=args.path, new_name=args.new_name, fetch=args.fetch,
                             recursive=args.recursive, thinking=args.thinking)
     elif args.command == "exit":

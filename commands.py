@@ -134,7 +134,7 @@ def renamef(file_path: str | None,
         print("Initiating task...")
         llm = Assistant(thinking)  # Left outside loop so a new API client is not created each iteration -> shaves time
         print("Changes will be listed below: ")
-        nr_of_files = sum(len(_list) for _list in file_list.values()) + 1
+        nr_of_files = sum(len(_list) for _list in file_list.values())
         counter = 0
         for _list in file_list.values():
             for file in _list:

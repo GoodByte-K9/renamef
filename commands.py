@@ -59,7 +59,8 @@ def summf(file_path: str, expand: bool = False, thinking: bool = False) -> None:
 def renamef(file_path: str | None,
             new_name: str | None,
             fetch: bool = False,
-            recursive: bool = False) -> None:
+            recursive: bool = False,
+            thinking: bool = False) -> None:
 
     def extract_results(result: Result):
         text: str = result.text
@@ -110,6 +111,7 @@ def renamef(file_path: str | None,
         print(rnm_reply)
         return
 
+    global paths_dict
     file_list = None
 
     if fetch and file_path is None and new_name is None:
@@ -130,12 +132,16 @@ def renamef(file_path: str | None,
         if not green_light(file_list):  # Confirm from user whether the list of files should be renamed
             return
         print("Initiating task...")
-        llm = Assistant()  # Left outside the loop so a new API client is not created on each iteration -> shaves time
+        llm = Assistant(thinking)  # Left outside loop so a new API client is not created each iteration -> shaves time
         print("Changes will be listed below: ")
+        nr_of_files = sum(len(_list) for _list in file_list.values()) + 1
+        counter = 0
         for _list in file_list.values():
             for file in _list:
-                print(llm.chat(prompts.renamef_default + file))
+                counter += 1
+                print(f"Renamed file {counter}/{nr_of_files}\n{llm.chat(prompts.renamef_default + file)}")
                 llm.reset_history()  # Clear so context window doesn't get out of hand
+        paths_dict = {}  # Reset paths dict after name changes, as old entries cannot be reused
 
     stop_model()
 
@@ -153,9 +159,10 @@ def parse_arguments(command: list[str]) -> None:
     elif args.command == "summf":
         commands["summf"](file_path=args.path.strip('"'), expand=args.expand, thinking=args.thinking)
     elif args.command == "renamef":
-        if args.recursive and args.all is False:
-            renamef_parser.error("'--recursive' only works with ...")  # Exits function because it raises SystemExit
-        commands["renamef"](file_path=args.path, new_name=args.new_name, fetch=args.fetch, recursive=args.recursive)
+        if args.recursive and args.new_name is True:
+            renamef_parser.error('"-r" cannot be used with "NEW_NAME"')  # Exits function because it raises SystemExit
+        commands["renamef"](file_path=args.path, new_name=args.new_name, fetch=args.fetch,
+                            recursive=args.recursive, thinking=args.thinking)
     elif args.command == "exit":
         ...
 
@@ -166,21 +173,22 @@ subparsers = parser.add_subparsers(dest="command")
 help_parser = subparsers.add_parser("help", description="List available commands.")
 
 listf_parser = subparsers.add_parser("listf", description=help_listf)
-listf_parser.add_argument("path", metavar="PATH")
+listf_parser.add_argument("path", metavar='"PATH"')
 listf_parser.add_argument("-r", "--recursive", action="store_true", help=listf_recursive_arg)
 listf_parser.add_argument("-s", "--save", action="store_true", help=listf_save_arg)
 
 summf_parser = subparsers.add_parser("summf", description=help_summf)
-summf_parser.add_argument("path", metavar="PATH")
+summf_parser.add_argument("path", metavar='"PATH"')
 summf_parser.add_argument("-e", "--expand", action="store_true", help=summf_expand_arg)
 summf_parser.add_argument("-t", "--thinking", action="store_true", help=summf_thinking_arg)
 
 renamef_parser = subparsers.add_parser("renamef", description=help_renamef)
-renamef_parser.add_argument("path", metavar="PATH", nargs="?")
+renamef_parser.add_argument("path", metavar='"PATH"', nargs="?")
 excl_renamef_args = renamef_parser.add_mutually_exclusive_group()
-excl_renamef_args.add_argument("new_name", metavar="NEW_NAME", nargs="?")  # value=None if left empty
+excl_renamef_args.add_argument("new_name", metavar='"NEW_NAME"', nargs="?")  # value=None if left empty
 excl_renamef_args.add_argument("-f", "--fetch", action="store_true", help=renamef_fetch_arg)
 excl_renamef_args.add_argument("-r", "--recursive", action="store_true", help=renamef_recursive_arg)
+renamef_parser.add_argument("-t", "--thinking", action="store_true")
 
 commands = {
     "help": _help,

@@ -5,38 +5,20 @@ from tool_results import Result
 
 def rename_files(rename_plan: list[dict[str, str]]) -> Result:
     # rename_plan example:
-    # [{"original_path": "C:\\Users\\sethg\\Desktop\\tests\\12345678.PDF", "new_name": "power_of_attorney.pdf"}]
-    # Each name must be unique relative to each other
+    # [{"original_path": "C:\\Users\\Public\\Public Documents\\12345678.PDF", "new_name": "deepest_secrets.pdf"}]
     file_data = Result()
     change_log = ["Successes: 0", "Failures: 0"]
     successes = 0
     failures = 0
 
-    # Confirm the renaming plan from the user
-    print(f"Tool call initiated by Assistant. Review requested changes:\n")
-
     forbidden_characters = ["\\", "/", "..", ":", "*", "?", '"', "<", ">", "|"]
     for dictionary in rename_plan:
         full_path = dictionary["original_path"]
         new_name = dictionary["new_name"]
-
+        # Check for sus in new_name
         if any(character in new_name for character in forbidden_characters):
             file_data.text = f"Error: Process interrupted. File name {new_name} contains illegal symbols or characters."
             return file_data
-
-        print(f"Original file: {Path(full_path)}  |  New file name: {new_name}")
-
-    while True:
-        user_confirmation = input("Confirm the changes? (yes/no)\n")
-        if user_confirmation.lower() in ["yes", "y"]:
-            print("Renaming plan accepted. Proceeding to execute the plan...")
-            break
-        elif user_confirmation.lower() == ["no", "n"]:
-            print("Process interrupted. Informing Assistant of rejected plan.")
-            file_data.text = "User rejected renaming plan."
-            return file_data
-        else:
-            print("Warning: Only a yes/y or a no/n is accepted as an answer.")
 
     # Execute the renaming plan
     for dictionary in rename_plan:

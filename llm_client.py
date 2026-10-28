@@ -1,4 +1,4 @@
-from dataclasses import asdict, dataclass
+from dataclasses import asdict
 import json
 
 from openai import OpenAI
@@ -21,8 +21,8 @@ class Assistant:
             {"type": "function", "function": rename_files_function}
         ]
 
-    def chat(self, message: str) -> str | None:
-        messages = self.history + [{"role": "user", "content": message}]
+    def chat(self, user_message: str) -> str | None:
+        messages = self.history + [{"role": "user", "content": user_message}]
         response = self.openrouter.chat.completions.create(
             model=self.model,
             messages=messages,
@@ -30,16 +30,17 @@ class Assistant:
             tools=self.tools,  # type: ignore
         )
         # Add user message and LLM reply to history:
-        self.history.append({"role": "user", "content": message})
+        # self.history.append({"role": "user", "content": user_message})
         if not response.choices[0].finish_reason == "tool_calls":
             self.history.append({"role": "assistant", "content": response.choices[0].message.content})
 
+        # TODO: LLM failed to follow up with another tool call. Why?
         while response.choices[0].finish_reason == "tool_calls":
             msg_4_tool = response.choices[0].message  # "message" holds the "role", "content", and "tool_calls" keys
             tool_result = Assistant.dispatcher(msg_4_tool)
-            self.history.append(msg_4_tool)
-            self.history.extend(tool_result)
-            messages = self.history
+            messages.append(msg_4_tool)
+            messages.extend(tool_result)
+            self.history = messages
             response = self.openrouter.chat.completions.create(
                 model=self.model,
                 messages=messages,
@@ -48,6 +49,9 @@ class Assistant:
             )
 
         return response.choices[0].message.content
+
+    def reset_history(self) -> None:
+        self.history: list = [{"role": "system", "content": system_instruction}]
 
     @staticmethod
     def dispatcher(llm_msg) -> list[dict] | str:

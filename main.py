@@ -33,7 +33,7 @@ print(f"{texts.art}\n{texts.welcome}")
 # Must specify POSIX for shlex, lest it fail at reading paths with backslashes
 is_posix = False if platform.system() == "Windows" else True
 while running:
-    user_input = shlex.split(input("> "), posix=is_posix)
+    user_input = shlex.split(input("\n> "), posix=is_posix)
     try:
         parse_arguments(user_input)
     except SystemExit:

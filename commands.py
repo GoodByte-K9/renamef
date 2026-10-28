@@ -57,7 +57,6 @@ def summf(file_path: str, expand: bool = False, thinking: bool = False) -> None:
 
 
 def renamef(file_path: str | None,
-            new_name: str | None,
             fetch: bool = False,
             recursive: bool = False,
             thinking: bool = False) -> None:
@@ -90,21 +89,10 @@ def renamef(file_path: str | None,
             else:
                 print("Warning: Only a yes/y or a no/n is accepted as an answer.")
 
-    # User initiated file renaming
-    if file_path and new_name:
-        file_to_rename = [{"original_path": file_path.strip('"'), "new_name": new_name}]
-        # rename the file and extract results
-        r_text, r_change_log = extract_results(rename_files(file_to_rename))
-        log_str = "\n".join(r_change_log)
-
-        rnm_reply = r_text if not None else log_str
-        print(rnm_reply)
-        return
-
     global paths_dict
     file_list = None
 
-    if fetch and file_path is None and new_name is None:
+    if fetch and file_path is None:
         fetch = fetch if any(paths_dict.values()) else False  # fetch_dict can only be True if paths_dict is not empty
         if fetch is False:
             print("Error: Failed to fetch file list. File list was empty...")
@@ -112,7 +100,7 @@ def renamef(file_path: str | None,
         else:
             file_list = paths_dict
 
-    if file_path or file_path and new_name is None and not fetch:
+    if file_path and not fetch:
         if Path(file_path.strip('"')).is_file():
             file_list = {"specific_file": [file_path]}
         else:
@@ -155,7 +143,7 @@ def parse_arguments(command: list[str]) -> None:
             renamef_parser.error('argument -r/--recursive: not allowed with argument "NEW_NAME"')
         if args.path and args.fetch or args.new_name and args.fetch:
             renamef_parser.error('argument -f/--fetch: not allowed with arguments "PATH" or "NEW_NAME"')
-        commands["renamef"](file_path=args.path, new_name=args.new_name, fetch=args.fetch,
+        commands["renamef"](file_path=args.path, fetch=args.fetch,
                             recursive=args.recursive, thinking=args.thinking)
     elif args.command == "exit":
         ...
@@ -166,23 +154,32 @@ subparsers = parser.add_subparsers(dest="command")
 
 help_parser = subparsers.add_parser("help", description="List available commands.")
 
-listf_parser = subparsers.add_parser("listf", description=help_listf)
+listf_parser = subparsers.add_parser("listf",
+                                     description=help_listf,
+                                     epilog=listf_epilog,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
 listf_parser.add_argument("path", metavar='"PATH"')
 listf_parser.add_argument("-r", "--recursive", action="store_true", help=listf_recursive_arg)
 listf_parser.add_argument("-s", "--save", action="store_true", help=listf_save_arg)
 
-summf_parser = subparsers.add_parser("summf", description=help_summf)
+summf_parser = subparsers.add_parser("summf",
+                                     description=help_summf,
+                                     epilog=summf_epilog,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
 summf_parser.add_argument("path", metavar='"PATH"')
 summf_parser.add_argument("-e", "--expand", action="store_true", help=summf_expand_arg)
 summf_parser.add_argument("-t", "--thinking", action="store_true", help=summf_thinking_arg)
 
-renamef_parser = subparsers.add_parser("renamef", description=help_renamef)
+renamef_parser = subparsers.add_parser("renamef",
+                                       description=help_renamef,
+                                       epilog=renamef_epilog,
+                                       formatter_class=argparse.RawDescriptionHelpFormatter)
 renamef_parser.add_argument("path", metavar='"PATH"', nargs="?")
 excl_renamef_args = renamef_parser.add_mutually_exclusive_group()
-excl_renamef_args.add_argument("new_name", metavar='"NEW_NAME"', nargs="?")  # value=None if left empty
 excl_renamef_args.add_argument("-f", "--fetch", action="store_true", help=renamef_fetch_arg)
 excl_renamef_args.add_argument("-r", "--recursive", action="store_true", help=renamef_recursive_arg)
 renamef_parser.add_argument("-t", "--thinking", action="store_true")
+
 
 commands = {
     "help": _help,
@@ -190,5 +187,4 @@ commands = {
     "summf": summf,
     "renamef": renamef,
     "exit": _exit,
-    "quit": _exit,
 }

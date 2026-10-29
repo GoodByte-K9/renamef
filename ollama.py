@@ -75,9 +75,8 @@ def server() -> subprocess.Popen | None:
     logs_folder.mkdir(parents=True, exist_ok=True)
 
     with open("logs/ollama.log", "a", encoding="utf-8") as log:  # "a" = append
-        print("no server process found, launching ollama...")
+        print("no server process found, starting process...")
         ollama_server = subprocess.Popen(["ollama", "serve"], stdout=log, stderr=log)
-        print("ollama is running...")
     return ollama_server
 
 
@@ -101,8 +100,6 @@ def pull_model() -> None:
             print("Failed to pull the model.\n"
                   "Check your internet connection, firewall rules and model name in config file\n"
                   "LLM features (summf, renamef with switches) are unavailable.")
-    else:
-        print("model is available, welcoming user...")
 
 
 if __name__ == "__main__":

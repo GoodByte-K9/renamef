@@ -1,11 +1,8 @@
 import argparse
 import subprocess
-import sys
 from pathlib import Path
-from typing import cast
 
 from file_reader import list_files, read_file
-from renamer import rename_files
 from llm_client import Assistant
 from tool_results import Result
 from config import CONFIG

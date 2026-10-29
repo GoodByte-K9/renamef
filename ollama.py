@@ -56,15 +56,20 @@ def install() -> None:
         subprocess.run(["open", str(installer)])
 
 
-def server() -> subprocess.Popen | None:
-    print("checking if ollama server is running...")
+def is_process_running():
     for process in psutil.process_iter(["name"]):  # run through all active processes
         process_name = process.info["name"]
         if process_name is None:
             continue
         elif process_name.lower().startswith("ollama"):
-            print("server is up and running...")
-            return None
+            return True
+    return False
+
+
+def server() -> subprocess.Popen | None:
+    print("checking if ollama server is running...")
+    if is_process_running():
+        return None
 
     logs_folder = Path(__name__).parent / "logs"
     logs_folder.mkdir(parents=True, exist_ok=True)
@@ -74,6 +79,13 @@ def server() -> subprocess.Popen | None:
         ollama_server = subprocess.Popen(["ollama", "serve"], stdout=log, stderr=log)
         print("ollama is running...")
     return ollama_server
+
+
+def terminate_process(process):
+    process.terminate()
+    process.wait(timeout=5)
+    if process:
+        process.kill()
 
 
 def pull_model() -> None:

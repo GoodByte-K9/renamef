@@ -1,7 +1,7 @@
 import shlex
 import shutil
 import platform
-
+import sys
 
 from llm_client import Assistant
 from commands import parse_arguments
@@ -10,6 +10,7 @@ import texts
 
 assistant = Assistant()
 running = True
+app_response = ""
 
 print("checking if Ollama is installed...")
 ollama_path = shutil.which("ollama")
@@ -32,9 +33,18 @@ print(f"{texts.art}\n{texts.welcome}")
 
 # Must specify POSIX for shlex, lest it fail at reading paths with backslashes
 is_posix = False if platform.system() == "Windows" else True
-while running:
-    user_input = shlex.split(input("\n> "), posix=is_posix)
-    try:
-        parse_arguments(user_input)
-    except SystemExit:
-        pass
+try:
+    while running:
+        user_input = shlex.split(input("\n> "), posix=is_posix)
+        try:
+            app_response = parse_arguments(user_input)
+        except SystemExit:
+            pass
+        if app_response == "exit":
+            break
+except KeyboardInterrupt:
+    print("Exiting...\n")
+    sys.exit()
+finally:
+    if ollama_server is not None:
+        ollama.terminate_process(ollama_server)

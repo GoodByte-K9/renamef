@@ -70,10 +70,4 @@ renamef "C:\Users\Public\Documents\1234567.txt"
 '''
 
 # ------------------------------ EXIT ------------------------------ #
-help_exit = r"""Usage: exit
-or: quit
-Exit the application.
-
-Example:
-exit
-"""
+help_exit = "Exit the application."

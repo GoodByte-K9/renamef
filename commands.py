@@ -1,6 +1,8 @@
 import argparse
 import subprocess
+import sys
 from pathlib import Path
+from typing import cast
 
 from file_reader import list_files, read_file
 from renamer import rename_files
@@ -33,13 +35,13 @@ def listf(path: str, recursive: bool = False, save: bool = False) -> str | None:
         list_result: Result = list_files(path, recursive_listing=True)
     if issue := list_result.text:
         print(issue)
-        return None
+        return
     if save:
         paths_dict = list_result.paths
     for key in list_result.paths:
         for item in list_result.paths[key]:
             print(item)
-    return None
+    return
 
 
 def summf(file_path: str, expand: bool = False, thinking: bool = False) -> None:
@@ -60,11 +62,6 @@ def renamef(file_path: str | None,
             fetch: bool = False,
             recursive: bool = False,
             thinking: bool = False) -> None:
-
-    def extract_results(result: Result):
-        text: str = result.text
-        change_log: list = result.change_log
-        return text, change_log
 
     def green_light(dict_of_files: dict[str, list], number_of_files: int) -> bool:
         display_length = 20
@@ -91,6 +88,11 @@ def renamef(file_path: str | None,
 
     global paths_dict
     file_list = None
+
+    if isinstance(file_path, str):
+        if not Path(file_path).is_file() or not Path(file_path).is_dir():
+            print(f"'{file_path.strip("\"'")}' is not a valid PATH...")
+            return
 
     if fetch and file_path is None:
         fetch = fetch if any(paths_dict.values()) else False  # fetch_dict can only be True if paths_dict is not empty
@@ -126,10 +128,10 @@ def renamef(file_path: str | None,
 
 
 def _exit():
-    ...
+    return "exit"
 
 
-def parse_arguments(command: list[str]) -> None:
+def parse_arguments(command: list[str]) -> str | None:
     args = parser.parse_args(command)
     if args.command == "help":
         commands["help"]()
@@ -138,15 +140,14 @@ def parse_arguments(command: list[str]) -> None:
     elif args.command == "summf":
         commands["summf"](file_path=args.path.strip('"'), expand=args.expand, thinking=args.thinking)
     elif args.command == "renamef":
-        if args.recursive and args.new_name is True:
-            # Exits function because it raises SystemExit
-            renamef_parser.error('argument -r/--recursive: not allowed with argument "NEW_NAME"')
-        if args.path and args.fetch or args.new_name and args.fetch:
-            renamef_parser.error('argument -f/--fetch: not allowed with arguments "PATH" or "NEW_NAME"')
+        if args.path and args.fetch:
+            renamef_parser.error('argument -f/--fetch: not allowed with arguments "PATH"')
         commands["renamef"](file_path=args.path, fetch=args.fetch,
                             recursive=args.recursive, thinking=args.thinking)
     elif args.command == "exit":
-        ...
+        exit_call = commands["exit"]()
+        return exit_call
+    return None
 
 
 parser = argparse.ArgumentParser(prog="")  # Empty string removes misguiding app name from help's "usage:" section
@@ -180,6 +181,7 @@ excl_renamef_args.add_argument("-f", "--fetch", action="store_true", help=rename
 excl_renamef_args.add_argument("-r", "--recursive", action="store_true", help=renamef_recursive_arg)
 renamef_parser.add_argument("-t", "--thinking", action="store_true")
 
+_exit_parser = subparsers.add_parser("exit", description=help_exit)
 
 commands = {
     "help": _help,

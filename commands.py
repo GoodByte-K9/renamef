@@ -176,7 +176,7 @@ renamef_parser.add_argument("path", metavar='"PATH"', nargs="?")
 excl_renamef_args = renamef_parser.add_mutually_exclusive_group()
 excl_renamef_args.add_argument("-f", "--fetch", action="store_true", help=renamef_fetch_arg)
 excl_renamef_args.add_argument("-r", "--recursive", action="store_true", help=renamef_recursive_arg)
-renamef_parser.add_argument("-t", "--thinking", action="store_true")
+renamef_parser.add_argument("-t", "--thinking", action="store_true", help=renamef_thinking_arg)
 
 _exit_parser = subparsers.add_parser("exit", description=help_exit)
 

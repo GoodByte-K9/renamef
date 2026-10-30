@@ -1,6 +1,6 @@
 # renamef
 A privacy oriented app that renames or summarizes documents using a local LLM.
-(name pronounced in a Shakespearean manner with an English accent)
+(name pronounced in a Shakespearean manner with an English accent, followed by a snobbish twitch of an eyebrow)
 
 ## Features
 add gif here

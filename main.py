@@ -27,7 +27,7 @@ if ollama_path is None:
         else:
             print("Invalid answer...")
 
-ollama_server = ollama.server()  # TODO: Use ollama_server.terminate() to quit the program
+ollama_server = ollama.server()
 ollama.pull_model()
 print(f"{texts.art}\n{texts.welcome}")
 
@@ -41,6 +41,7 @@ try:
         except SystemExit:
             pass
         if app_response == "exit":
+            print("")
             break
 except KeyboardInterrupt:
     print("Exiting...\n")

@@ -1,18 +1,12 @@
 
 art = r"""
-        .-----------.
- ___    |           |
-/_._`.__|           |_
-    `(|_|_m_______m_|_|)
-      |_______________|
-      /o o o o o o o o\
-    /o o o o o o o o o\
-    ;[]o o o o o o o o[];
-    |  -============-   |
-     '------------------'
++---------------------------+
+|  renamef                  |
+|  automated file renaming  |
++---------------------------+
 """
 
-welcome = """Welcome to File Renamer. Does what it says on the tin. LLM-powered for context comprehension.
+welcome = """Welcome to renamef. Does what it says on the tin: renames files. LLM-powered for context comprehension.
 Type "help" for commands."""
 
 install_confirmation = ("\nNo installation found. Ollama is required for the app to work in its intended way.\n"

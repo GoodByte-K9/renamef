@@ -26,6 +26,10 @@ if shutil.which("ollama") is None:
         else:
             print("Invalid answer...")
 
+if not shutil.which("ollama"):
+    print("No Ollama installation detected. Exiting...\n")
+    sys.exit()
+
 ollama_server = ollama.server()
 ollama.pull_model()
 print(f"{texts.art}\n{texts.welcome}")

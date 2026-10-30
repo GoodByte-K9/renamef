@@ -21,4 +21,8 @@ toml file: other ollama models, extending OCR language support
 supported file types, model accuracy, umlauts and swedish characters in file names
 
 ## License
-Check library licenses and requirements, like pymupdf.
+This project is licensed under the GNU AGPL-3.0 — see LICENSE.
+
+It depends on PyMuPDF and pymupdf4llm by Artifex Software, licensed under AGPL-3.0.
+Bundled Tesseract language data (tessdata/) is licensed under Apache 2.0 — see tessdata/LICENSE.
+The LLM (Gemma 4) is downloaded via Ollama and is subject to its own license.

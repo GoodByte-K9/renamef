@@ -14,6 +14,8 @@ install_confirmation = ("\nNo installation found. Ollama is required for the app
 
 install_warning = "Ollama is required for the application to work. Exiting application..."
 
+setup_wait = "Waiting for setup to finish..."
+
 # ------------------------------ HELP ------------------------------ #
 help_command_list = """
     help - List available commands.

@@ -8,6 +8,7 @@ import psutil
 import requests
 from tqdm import tqdm
 
+import texts
 from config import CONFIG
 
 INSTALLER_URLS = {
@@ -25,6 +26,9 @@ def download_installer(url: str) -> Path | None:
     url_path = url_components.path  # '/download/OllamaSetup.exe'
     installer_name = PurePosixPath(url_path).name  # turn into path object and keep name only: 'OllamaSetup.exe'
     final_destination = Path(tempfile.gettempdir()) / installer_name  # C:\ ... \Temp\OllamaSetup.exe 💀
+
+    if final_destination.is_file():
+        return final_destination
 
     # stream=True prevents loading the entire response into memory at once, downloading it one chunk at a time:
     with requests.get(url, stream=True, timeout=30) as response:
@@ -51,8 +55,10 @@ def install() -> None:
     installer = download_installer(url)
     # launch installer:
     if _os == "Windows":
-        subprocess.Popen([str(installer)])
+        print(texts.setup_wait)
+        subprocess.run([str(installer)])
     elif _os == "Darwin":  # Darwin = Mac
+        print(texts.setup_wait)
         subprocess.run(["open", str(installer)])
 
 
@@ -92,7 +98,7 @@ def pull_model() -> None:
     print(f"checking if {model} is available...")
     process_show = subprocess.run(["ollama", "show", model], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
     if process_show.returncode != 0:
-        print(f"{model} not available. Initiating download...")
+        print(f"{model} not available. Initiating download...\n")
         process_pull = subprocess.run(["ollama", "pull", model])
 
         if process_pull.returncode != 0:

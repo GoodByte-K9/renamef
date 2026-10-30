@@ -183,4 +183,4 @@ read_file_function = {
 }
 
 if __name__ == "__main__":
-    print(list_files(r"C:\Users\sethg\Desktop\pdf_folder - tests\testy"))
+    print(list_files(r"C:\Users\Public\Documents"))

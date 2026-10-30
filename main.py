@@ -5,7 +5,7 @@ import sys
 
 from llm_client import Assistant
 from commands import parse_arguments
-import ollama
+import ollama_manager
 import texts
 
 assistant = Assistant()
@@ -18,7 +18,7 @@ if shutil.which("ollama") is None:
     while True:
         install_confirmation = input(texts.install_confirmation)
         if install_confirmation in ["yes", "y"]:
-            ollama.install()
+            ollama_manager.install()
             break
         elif install_confirmation in ["no", "n"]:
             print(f"\n{texts.install_warning}\n")
@@ -30,8 +30,8 @@ if not shutil.which("ollama"):
     print("No Ollama installation detected. Exiting...\n")
     sys.exit()
 
-ollama_server = ollama.server()
-ollama.pull_model()
+ollama_server = ollama_manager.server()
+ollama_manager.pull_model()
 print(f"{texts.art}\n{texts.welcome}")
 
 # Must specify POSIX for shlex, lest it fail at reading paths with backslashes
@@ -51,4 +51,4 @@ except KeyboardInterrupt:
     sys.exit()
 finally:
     if ollama_server is not None:
-        ollama.terminate_process(ollama_server)
+        ollama_manager.terminate_process(ollama_server)

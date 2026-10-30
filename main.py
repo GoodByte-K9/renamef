@@ -11,19 +11,18 @@ import texts
 assistant = Assistant()
 running = True
 app_response = ""
+ollama_server = None
 
 print("checking if Ollama is installed...")
-ollama_path = shutil.which("ollama")
-if ollama_path is None:
+if shutil.which("ollama") is None:
     while True:
         install_confirmation = input(texts.install_confirmation)
         if install_confirmation in ["yes", "y"]:
             ollama.install()
             break
         elif install_confirmation in ["no", "n"]:
-            print(texts.install_warning)
-            running = False
-            break
+            print(f"\n{texts.install_warning}\n")
+            sys.exit()
         else:
             print("Invalid answer...")
 

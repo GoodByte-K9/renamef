@@ -26,6 +26,9 @@ def download_installer(url: str) -> Path | None:
     installer_name = PurePosixPath(url_path).name  # turn into path object and keep name only: 'OllamaSetup.exe'
     final_destination = Path(tempfile.gettempdir()) / installer_name  # C:\ ... \Temp\OllamaSetup.exe 💀
 
+    if final_destination.is_file():
+        return final_destination
+
     # stream=True prevents loading the entire response into memory at once, downloading it one chunk at a time:
     with requests.get(url, stream=True, timeout=30) as response:
         response.raise_for_status()

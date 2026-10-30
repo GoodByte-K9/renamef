@@ -8,6 +8,7 @@ import psutil
 import requests
 from tqdm import tqdm
 
+import texts
 from config import CONFIG
 
 INSTALLER_URLS = {
@@ -54,8 +55,10 @@ def install() -> None:
     installer = download_installer(url)
     # launch installer:
     if _os == "Windows":
-        subprocess.Popen([str(installer)])
+        print(texts.setup_wait)
+        subprocess.run([str(installer)])
     elif _os == "Darwin":  # Darwin = Mac
+        print(texts.setup_wait)
         subprocess.run(["open", str(installer)])
 
 
@@ -95,7 +98,7 @@ def pull_model() -> None:
     print(f"checking if {model} is available...")
     process_show = subprocess.run(["ollama", "show", model], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
     if process_show.returncode != 0:
-        print(f"{model} not available. Initiating download...")
+        print(f"{model} not available. Initiating download...\n")
         process_pull = subprocess.run(["ollama", "pull", model])
 
         if process_pull.returncode != 0:

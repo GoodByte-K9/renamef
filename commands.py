@@ -85,13 +85,14 @@ def renamef(file_path: str | None,
 
     global paths_dict
     file_list = None
+    clean_path = file_path.strip("\"'") if file_path is not None else None
 
-    if isinstance(file_path, str):
-        if not Path(file_path).is_file() or not Path(file_path).is_dir():
-            print(f"'{file_path.strip("\"'")}' is not a valid PATH...")
+    if isinstance(clean_path, str):
+        if Path(clean_path).is_file() is False and Path(clean_path).is_dir() is False:
+            print(f"'{clean_path}' is not a valid PATH...")
             return
 
-    if fetch and file_path is None:
+    if fetch and clean_path is None:
         fetch = fetch if any(paths_dict.values()) else False  # fetch_dict can only be True if paths_dict is not empty
         if fetch is False:
             print("Error: Failed to fetch file list. File list was empty...")
@@ -99,11 +100,11 @@ def renamef(file_path: str | None,
         else:
             file_list = paths_dict
 
-    if file_path and not fetch:
-        if Path(file_path.strip('"')).is_file():
-            file_list = {"specific_file": [file_path]}
+    if clean_path and not fetch:
+        if Path(clean_path).is_file():
+            file_list = {"specific_file": [clean_path]}
         else:
-            file_list = list_files(file_path.strip('"'), recursive).paths  # Result -> Dict
+            file_list = list_files(clean_path, recursive).paths  # Result -> Dict
 
     if file_list is not None:
         nr_of_files = sum(len(_list) for _list in file_list.values())

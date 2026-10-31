@@ -46,7 +46,7 @@ def run() -> None:
             except SystemExit:
                 pass
             if app_response == "exit":
-                print("")
+                print("\nExiting...\n")
                 break
     except KeyboardInterrupt:
         print("Exiting...\n")

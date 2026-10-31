@@ -3,22 +3,18 @@ import shutil
 import platform
 import sys
 
-from llm_client import Assistant
 from commands import parse_arguments
 import ollama_manager
 import texts
 
-assistant = Assistant()
-running = True
-app_response = ""
-ollama_server = None
 
+def run() -> None:
+    app_response = ""
 
-def run():
     print("checking if Ollama is installed...")
     if shutil.which("ollama") is None:
         while True:
-            install_confirmation = input(texts.install_confirmation)
+            install_confirmation = input(texts.install_confirmation).strip().lower()
             if install_confirmation in ["yes", "y"]:
                 ollama_manager.install()
                 break
@@ -39,7 +35,7 @@ def run():
     # Must specify POSIX for shlex, lest it fail at reading paths with backslashes
     is_posix = False if platform.system() == "Windows" else True
     try:
-        while running:
+        while True:
             user_input = shlex.split(input("\n> "), posix=is_posix)
             try:
                 app_response = parse_arguments(user_input)

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "renamef"
 license = "AGPL-3.0-or-later"
-version = "26.11.0"
+version = "26.10.0"
 requires-python = ">=3.12"
 dependencies = [
     "openai>=3.35",

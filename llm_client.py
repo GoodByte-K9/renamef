@@ -34,7 +34,6 @@ class Assistant:
         if not response.choices[0].finish_reason == "tool_calls":
             self.history.append({"role": "assistant", "content": response.choices[0].message.content})
 
-        # TODO: LLM failed to follow up with another tool call. Why?
         while response.choices[0].finish_reason == "tool_calls":
             msg_4_tool = response.choices[0].message  # "message" holds the "role", "content", and "tool_calls" keys
             tool_result = Assistant.dispatcher(msg_4_tool)

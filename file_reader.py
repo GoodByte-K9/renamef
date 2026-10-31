@@ -137,7 +137,8 @@ def read_file(absolute_file_path: str, expand_context: bool = False) -> Result:
             if file_data.text == "":
                 doc = pymupdf.open(file_path)
                 pages = 1 if expand_context is False else len(doc)
-                for page_num in range(pages):
+                pages_2_read = pages if pages <= 3 else 3
+                for page_num in range(pages_2_read):
                     image_bytes = doc[page_num].get_pixmap().tobytes(output="png")  # Transform page image to binary
                     encode_image(data_object=file_data, img_bytes=image_bytes, suffix="png")
         elif file_suffix == ".txt" or file_suffix == ".md":

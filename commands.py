@@ -73,7 +73,9 @@ def renamef(file_path: str | None,
             print(f"+ {actual_length - len(displayed_files)} files to rename...")
 
         while True:
-            user_confirmation = input("Do you wish to proceed? (yes/no)\n").strip().lower()
+            print("Do you wish to proceed? (yes/no)")
+            user_confirmation = input("> ").strip("> \t\r\n").lower()
+            print("")
             if user_confirmation in ["yes", "y"]:
                 print("List accepted. Proceeding to execute the plan...")
                 return True
@@ -117,7 +119,7 @@ def renamef(file_path: str | None,
         for _list in file_list.values():
             for file in _list:
                 counter += 1
-                print(f"Renamed file {counter}/{nr_of_files}\n{llm.chat(prompts.renamef_default + file)}")
+                print(f"Renamed file {counter}/{nr_of_files}\n{llm.chat(prompts.renamef_default + file)}\n")
                 llm.reset_history()  # Clear so context window doesn't get out of hand
         paths_dict = {}  # Reset paths dict after name changes, as old entries cannot be reused
         print("Task finished.")

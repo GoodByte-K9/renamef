@@ -38,6 +38,7 @@ def run() -> None:
         while True:
             try:
                 user_input = shlex.split(input("\n> "), posix=is_posix)
+                print("")
             except ValueError as e:
                 print(f"{e}. Please try again...")
                 continue

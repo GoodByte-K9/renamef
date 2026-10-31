@@ -28,7 +28,8 @@ One can use features like `listf` or `summf` to list files in a directory or giv
 3. Type `help` for a list of commands
 4. Type `<command> -h` for command-specific guidance and more examples
 
-Example: `summf --thinking "C:\Users\Public\Documents\2026-03-14_product-spec_chronodyne.pdf"`\
+Example: `summf --thinking "C:\Users\Public\Documents\2026-03-14_product-spec_chronodyne.pdf"`
+<br>
 
 <img width="700" alt="renamef_summf" src="https://github.com/user-attachments/assets/e7e09a39-0083-484d-9ffb-76aceff0d6d1" />
 

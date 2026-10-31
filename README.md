@@ -5,8 +5,8 @@ A privacy oriented app that renames or summarizes documents using a local LLM.
 ## Features
 add gif here
 
-renamef's greatest strength is privacy: no data leaves your local machine and you can automate the renaming of as many files (theoretically) as you want.
-One can use features like `listf` or `summf` to list files in a directory, or give you a summary of a given file. `renamef` is the meat of the app and allows one to rename all files in a directory (or its subdirectories) in an automated context-aware manner. And it _should_ work on Windows, Mac and Linux.
+renamef's greatest strength is privacy: no data leaves your local machine and you can automate the renaming of (theoretically) as many files as you want.
+One can use features like `listf` or `summf` to list files in a directory or give you a summary of a given file. `renamef` is the meat of the app and allows one to rename all files in a directory (or its subdirectories) in an automated context-aware manner. And it _should_ work on all platforms: Linux, Windows and Mac.
 
 ## Requirements
 #### Recommended System specs
@@ -41,18 +41,21 @@ You can do any of the above by editing the `config.toml` file in the project's r
 The underlying LLM can be changed simply by changing the model's name to one you wish to use. You can find a list of local models from the [Ollama website](https://ollama.com/search?c=local).  
 Note, that larger models will require more VRAM or system memory than the default model.
 
-#### Adding languages
+#### Expanding language support
 1. Download additional languages from [tesseract-ocr/tessdata](https://github.com/tesseract-ocr/tessdata)
 2. Copy them to the **tessdata** folder in this project's root.
-3. Add the additional language(s) to the `config.toml` file's "languages" variable under **[ocr]**.
+3. Add the additional language(s) to the `config.toml` file's "languages" variable under **\[ocr]**.
 
-For example, to support Swedish you would download the **swe.traineddata** from Tesseract, add it to the `.toml` file like so: `languages = "eng+deu+fin+swe"`, and you are good to go!
+For example, to support Swedish you would download the **swe.traineddata** from Tesseract, add it to the `config.toml` file like so: `languages = "eng+deu+fin+swe"`, and you are good to go!
+
+#### Changing tessdata folder path
+In `config.toml` change the `tessdata = "default"` entry to an absolute path of your choice, e.g. `tessdata = "C:\Users\Public\Documents\tessdata"`
 
 ## Limitations
 - renamef only supports the following file types: pdf, txt, md, png, jpeg, jpg, webp, gif
 - By default, renamef uses a small 2 billion parameter local model (Gemma 4 e2b). Model accuracy varied in tests, but was still useful. Results improved with thinking mode on.
-- Umlauts and Swedish characters in paths or file names are not currently supported.
-- By default, renamef can read documents in three languages: English, German and Finnish. Note, that the presence of umlauts and Swedish characters inside documents is not a problem.
+- Umlauts and Swedish characters in paths or file names are not currently supported. Note, that their presence inside documents is not an issue.
+- By default, renamef can read documents in three languages: English, German and Finnish. 
 
 ## License
 This project is licensed under the GNU AGPL-3.0 — see LICENSE.

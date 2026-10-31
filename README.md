@@ -3,7 +3,7 @@ A privacy oriented app that renames or summarizes documents using a local LLM.
 (name pronounced in a Shakespearean manner with an English accent, followed by a snobbish twitch of an eyebrow)
 
 ## Features
-<img alt="renamef_summf" src="https://github.com/user-attachments/assets/db7b5a04-0118-49c3-b5f7-a21d078a498c" />
+<img width="700" alt="renamef_summf" src="https://github.com/user-attachments/assets/db7b5a04-0118-49c3-b5f7-a21d078a498c" />
 
 renamef's greatest strength is privacy: no data leaves your local machine and you can automate the renaming of (theoretically) as many files as you want.
 One can use features like `listf` or `summf` to list files in a directory or give you a summary of a given file. `renamef` is the meat of the app and allows one to rename all files in a directory (or its subdirectories) in an automated context-aware manner.

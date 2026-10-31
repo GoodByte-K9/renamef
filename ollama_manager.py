@@ -3,8 +3,8 @@ from urllib.parse import urlparse
 import subprocess
 import platform
 import tempfile
-import psutil
 
+import psutil
 import requests
 from tqdm import tqdm
 
@@ -50,6 +50,7 @@ def install() -> None:
     if url is None:
         print("Automatic installation not supported for Linux. Run the following command to install Ollama:"
               f"\n{LINUX_COMMAND}")
+        input("\nAfter installing Ollama, press Enter to continue...")
         return
 
     installer = download_installer(url)

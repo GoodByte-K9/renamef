@@ -8,6 +8,7 @@ version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
     "openai>=3.35",
+    "psutil >=7.2",
     "pymupdf>=2.0",
     "pymupdf4llm>=2.0",
     "requests>=2.34",
@@ -15,7 +16,7 @@ dependencies = [
 ]
 
 [project.scripts]
-renamef = "main:main"
+renamef = "main:run"
 
 [tool.setuptools]
 py-modules = ["main", "commands", "config", "file_reader", "llm_client",

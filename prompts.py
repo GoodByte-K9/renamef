@@ -42,8 +42,10 @@ Who is it from?
 Unknown.
 
 Document to summarize: """
-summf_default = " Use read_file() with the given absolute_file_path"
-summf_expand = " Use read_file() with the given absolute_file_path and expand_context set to True."
+summf_default = """
+Use read_file() with the given absolute_file_path"""
+summf_expand = """
+Use read_file() with the given absolute_file_path and expand_context set to True."""
 
 # ------------------------------------ RENAMEF ------------------------------------ #
 renamef_default = """User requested to rename one file based on its contents. 

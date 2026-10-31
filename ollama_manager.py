@@ -3,8 +3,8 @@ from urllib.parse import urlparse
 import subprocess
 import platform
 import tempfile
-import psutil
 
+import psutil
 import requests
 from tqdm import tqdm
 

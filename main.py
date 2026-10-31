@@ -36,7 +36,11 @@ def run() -> None:
     is_posix = False if platform.system() == "Windows" else True
     try:
         while True:
-            user_input = shlex.split(input("\n> "), posix=is_posix)
+            try:
+                user_input = shlex.split(input("\n> "), posix=is_posix)
+            except ValueError as e:
+                print(f"{e}. Please try again...")
+                continue
             try:
                 app_response = parse_arguments(user_input)
             except SystemExit:

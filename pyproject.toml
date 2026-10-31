@@ -1,14 +1,15 @@
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "renamef"
+license = "AGPL-3.0-or-later"
 version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
     "openai>=3.35",
-    "psutil >=7.2",
+    "psutil>=7.2",
     "pymupdf>=2.0",
     "pymupdf4llm>=2.0",
     "requests>=2.34",
@@ -16,8 +17,10 @@ dependencies = [
 ]
 
 [project.scripts]
-renamef = "main:run"
+renamef = "renamef.main:run"
 
 [tool.setuptools]
-py-modules = ["main", "commands", "config", "file_reader", "llm_client",
-              "ollama_manager", "prompts", "renamer", "texts", "tool_results"]
+packages = ["renamef"]
+
+[tool.setuptools.package-data]
+renamef = ["config.toml", "tessdata/*"]

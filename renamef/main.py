@@ -1,11 +1,11 @@
+import sys
 import shlex
 import shutil
 import platform
-import sys
 
-from commands import parse_arguments
-import ollama_manager
-import texts
+from renamef.commands import parse_arguments
+from renamef import ollama_manager
+from renamef import texts
 
 
 def run() -> None:

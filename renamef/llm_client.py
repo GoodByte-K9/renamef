@@ -1,12 +1,12 @@
-from dataclasses import asdict
 import json
+from dataclasses import asdict
 
 from openai import OpenAI
 
-from file_reader import Result, list_files_function, read_file_function, list_files, read_file
-from prompts import system_instruction
-from renamer import rename_files_function, rename_files
-from config import CONFIG
+from renamef.config import CONFIG
+from renamef.prompts import system_instruction
+from renamef.renamer import rename_files_function, rename_files
+from renamef.file_reader import Result, list_files_function, read_file_function, list_files, read_file
 
 
 class Assistant:

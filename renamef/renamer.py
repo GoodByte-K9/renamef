@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from tool_results import Result
+from renamef.tool_results import Result
 
 
 def rename_files(rename_plan: list[dict[str, str]]) -> Result:

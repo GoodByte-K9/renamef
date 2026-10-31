@@ -1,5 +1,5 @@
 # Renamef
-A privacy oriented app that renames or summarizes documents using a local LLM.\
+A privacy-oriented app that renames or summarizes documents using a local LLM.\
 (name pronounced in a Shakespearean manner with an English accent, followed by a snobbish twitch of an eyebrow)
 
 ## Features
@@ -39,7 +39,7 @@ The following things can be configured in `renamef`:
 - Supported languages (by default they are English, German and Finnish)
 - Location of the tessdata folder
 
-You can do any of the above by editing the `config.toml` file in the project's root with a text editor of your choice.
+You can do any of the above by editing the `renamef/config.toml` file in the project's root with a text editor of your choice.
 
 #### Changing the model
 The underlying LLM can be changed simply by changing the model's name to one you wish to use. You can find a list of local models from the [Ollama website](https://ollama.com/search?c=local).  
@@ -48,12 +48,12 @@ Note, that larger models will require more VRAM or system memory than the defaul
 #### Expanding language support
 1. Download additional languages from [tesseract-ocr/tessdata](https://github.com/tesseract-ocr/tessdata)
 2. Copy them to the **tessdata** folder in this project's root.
-3. Add the additional language(s) to the `config.toml` file's "languages" variable under **\[ocr]**.
+3. Add the additional language (s) to the `renamef/config.toml` file's "languages" variable under **\[ocr]**.
 
-For example, to support Swedish you would download the **swe.traineddata** from Tesseract, add it to the `config.toml` file like so: `languages = "eng+deu+fin+swe"`, and you are good to go!
+For example, to support Swedish you would download the **swe.traineddata** from Tesseract, add it to the `renamef/config.toml` file like so: `languages = "eng+deu+fin+swe"`, and you are good to go!
 
 #### Changing tessdata folder path
-In `config.toml` change the `tessdata = "default"` entry to an absolute path of your choice, e.g. `tessdata = "C:\Users\Public\Documents\tessdata"`
+In `renamef/config.toml` change the `tessdata = "default"` entry to an absolute path of your choice, e.g. `tessdata = "C:\Users\Public\Documents\tessdata"`
 
 ## Limitations
 - Renamef only supports the following file types: pdf, txt, md, png, jpeg, jpg, webp, gif
@@ -62,7 +62,7 @@ In `config.toml` change the `tessdata = "default"` entry to an absolute path of 
 - By default, Renamef can read documents in three languages: English, German and Finnish. 
 
 ## License
-This project is licensed under the GNU AGPL-3.0 — see LICENSE.
+This project is licensed under the GNU AGPL-3.0 or later — see [LICENSE](LICENSE).
 
 It depends on PyMuPDF and pymupdf4llm by Artifex Software, licensed under AGPL-3.0.
 Bundled Tesseract language data (tessdata/) is licensed under Apache 2.0 — see tessdata/LICENSE.

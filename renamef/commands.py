@@ -2,12 +2,12 @@ import argparse
 import subprocess
 from pathlib import Path
 
-from file_reader import list_files, read_file
-from llm_client import Assistant
-from tool_results import Result
-from config import CONFIG
-from texts import *
-import prompts
+from renamef.file_reader import list_files
+from renamef.llm_client import Assistant
+from renamef.tool_results import Result
+from renamef.config import CONFIG
+from renamef.texts import *
+from renamef import prompts
 
 paths_dict: dict[str, list] = {}
 

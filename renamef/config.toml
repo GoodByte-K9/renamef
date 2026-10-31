@@ -1,0 +1,8 @@
+[llm]
+model = "gemma4:e2b"
+
+# Adding languages requires downloading relevant language packs to the tessdata folder
+# You can find them at: https://github.com/tesseract-ocr/tessdata
+[ocr]
+languages = "eng+deu+fin"
+tessdata = "default"

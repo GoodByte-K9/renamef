@@ -1,15 +1,15 @@
-from pathlib import Path, PurePosixPath
-from urllib.parse import urlparse
-import subprocess
-import platform
 import tempfile
+import platform
+import subprocess
+from urllib.parse import urlparse
+from pathlib import Path, PurePosixPath
 
-import psutil
-import requests
 from tqdm import tqdm
+import requests
+import psutil
 
-import texts
-from config import CONFIG
+from renamef import texts
+from renamef.config import CONFIG
 
 INSTALLER_URLS = {
             "Windows": "https://ollama.com/download/OllamaSetup.exe",
@@ -81,7 +81,7 @@ def server() -> subprocess.Popen | None:
     logs_folder = Path(__name__).parent / "logs"
     logs_folder.mkdir(parents=True, exist_ok=True)
 
-    with open("logs/ollama.log", "a", encoding="utf-8") as log:  # "a" = append
+    with open("../logs/ollama.log", "a", encoding="utf-8") as log:  # "a" = append
         print("no server process found, starting process...")
         ollama_server = subprocess.Popen(["ollama", "serve"], stdout=log, stderr=log)
     return ollama_server

@@ -9,8 +9,8 @@ from pathlib import Path
 import pymupdf4llm
 import pymupdf
 
-from tool_results import Result
-from config import CONFIG
+from renamef.config import CONFIG
+from renamef.tool_results import Result
 
 if CONFIG["ocr"]["tessdata"] not in ["tessdata", "default"]:
     os.environ["TESSDATA_PREFIX"] = CONFIG["ocr"]["tessdata"]

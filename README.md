@@ -1,5 +1,5 @@
 # renamef
-A privacy oriented app that renames or summarizes documents using a local LLM.
+A privacy oriented app that renames or summarizes documents using a local LLM.  
 (name pronounced in a Shakespearean manner with an English accent, followed by a snobbish twitch of an eyebrow)
 
 ## Features
@@ -16,7 +16,7 @@ One can use features like `listf` or `summf` to list files in a directory, or gi
 
 #### Other
 renamef requires Python installed on your machine.  
-Upon launch, it will check if you have Ollama installed, if not, it will attempt to install it for you and subsequentially pull the relevant model from Ollama to your machine.
+Upon launch, it will check if you have Ollama installed, if not, it will attempt to install it for you and subsequently pull the relevant model from Ollama to your machine.
 
 ## Installation
 ...

@@ -49,21 +49,22 @@ def silence_native_stderr():  # ...This is possible because 'yield' turns the fu
 # ------------------------------ LIST FILES ------------------------------ #
 def list_files(folder_path: str, recursive_listing: bool = False) -> Result:
     def find_folders_recursively(absolute_path: Path) -> list[Path] | Result:
-        try:
-            recursive_directories = [directory for directory in absolute_path.rglob("*/")]
-        except PermissionError:
-            file_data.text = "ERROR: Lacked read-permission to some subdirectories..."
-            return file_data
+        recursive_directories = [directory for directory in absolute_path.rglob("*/")]
         if recursive_directories:
             recursive_directories.insert(0, absolute_path)
         return recursive_directories
 
     def add_files_to_documents(absolute_path: Path) -> None:
-        for f in absolute_path.iterdir():  # f = file or folder. Looping through all of them
-            if f.is_file():
-                for key in documents_paths.keys():
-                    if f.suffix.lower() == key:
-                        documents_paths[key].append(str(f))
+        try:
+            paths_list = list(absolute_path.iterdir())
+        except PermissionError as e:
+            file_data.text = f"ERROR: {e}"
+        else:
+            for f in paths_list:  # f = file or folder. Looping through all of them
+                if f.is_file():
+                    for key in documents_paths.keys():
+                        if f.suffix.lower() == key:
+                            documents_paths[key].append(str(f))
 
     file_data = Result()
     documents_paths: dict = {  # Filled up by the add_files_to_documents() function
@@ -86,6 +87,8 @@ def list_files(folder_path: str, recursive_listing: bool = False) -> Result:
             add_files_to_documents(root_path)
         elif isinstance(recursive_folders, Result):
             file_data = recursive_folders
+            return file_data
+        if file_data.text:
             return file_data
 
     elif root_path.is_file():
@@ -160,7 +163,7 @@ def read_file(absolute_file_path: str, expand_context: bool = False) -> Result:
                         ocr_language=ocr_languages
                     )[:char_limit])
             if file_data.text.strip() == "":
-                for page_num in range(1 if expand_context else pages_2_read):
+                for page_num in range(1 if not expand_context else pages_2_read):
                     image_bytes = doc[page_num].get_pixmap(dpi=200).tobytes(output="png")  # Transform to binary
                     encode_image(data_object=file_data, img_bytes=image_bytes, suffix="png")
             doc.close()
@@ -178,7 +181,7 @@ def read_file(absolute_file_path: str, expand_context: bool = False) -> Result:
     elif file_path.is_dir():
         file_data.text = "ERROR: Received file path was a directory, not a file..."
     else:
-        file_data.text = "ERROR: Incorrect path — path, filename, or suffix might be erroneous..."
+        file_data.text = "ERROR: Incorrect path. Path, filename, or suffix might be erroneous, or access was denied..."
 
     return file_data
 

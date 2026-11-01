@@ -47,14 +47,15 @@ def silence_native_stderr():  # ...This is possible because 'yield' turns the fu
 
 
 # ------------------------------ LIST FILES ------------------------------ #
-def list_files(folder_path: str, recursive_listing: bool = False) -> Result | None:
+def list_files(folder_path: str, recursive_listing: bool = False) -> Result:
     def find_folders_recursively(absolute_path: Path) -> list[Path] | Result:
         try:
             recursive_directories = [directory for directory in absolute_path.rglob("*/")]
         except PermissionError:
             file_data.text = "ERROR: Lacked read-permission to some subdirectories..."
             return file_data
-        recursive_directories.insert(0, absolute_path)
+        if recursive_directories:
+            recursive_directories.insert(0, absolute_path)
         return recursive_directories
 
     def add_files_to_documents(absolute_path: Path) -> None:
@@ -77,8 +78,7 @@ def list_files(folder_path: str, recursive_listing: bool = False) -> Result | No
     }
     root_path = Path(folder_path)  # Convert folder_path into a Path object
     if root_path.is_dir():
-        # recursive_folders: list = find_folders_recursively(root_path) if recursive_listing is True else []
-        recursive_folders: list | Result = find_folders_recursively(root_path)
+        recursive_folders: list | Result = find_folders_recursively(root_path) if recursive_listing else []
         if isinstance(recursive_folders, list) and recursive_folders:
             for folder in recursive_folders:
                 add_files_to_documents(folder)
@@ -86,12 +86,14 @@ def list_files(folder_path: str, recursive_listing: bool = False) -> Result | No
             add_files_to_documents(root_path)
         elif isinstance(recursive_folders, Result):
             file_data = recursive_folders
+            return file_data
 
     elif root_path.is_file():
         file_data.text = "ERROR: Path is not a directory..."
         return file_data
     elif not root_path.is_file() and not root_path.is_dir():
-        print("ERROR: Path does not exist...")
+        file_data.text = "ERROR: Path does not exist..."
+        return file_data
     if any(documents_paths.values()):
         file_data.paths = documents_paths
     else:
@@ -136,29 +138,43 @@ def read_file(absolute_file_path: str, expand_context: bool = False) -> Result:
 
     if file_path.is_file():
         file_suffix = file_path.suffix.lower()
+
         if file_suffix == ".pdf":
+            try:
+                doc = pymupdf.open(file_path)
+            except pymupdf.FileDataError:
+                file_data.text = "ERROR: Document is broken or corrupted..."
+                return file_data
+            else:
+                if doc.needs_pass:
+                    file_data.text = "ERROR: Document is password protected and cannot be read..."
+                    doc.close()
+                    return file_data
+
+            pages_2_read: int = len(doc) if len(doc) <= 3 else 3
             with silence_native_stderr():
                 file_data.text = cast(
                     str, pymupdf4llm.to_markdown(
                         file_path,
-                        pages=[0] if not expand_context else [0, 1, 2],
-                        ocr_language=CONFIG["ocr"]["languages"]
+                        pages=[0] if not expand_context else [nr for nr in range(pages_2_read)],
+                        ocr_language=ocr_languages
                     )[:char_limit])
             if file_data.text.strip() == "":
-                with pymupdf.open(file_path) as doc:
-                    pages = 1 if not expand_context else len(doc)
-                    pages_2_read = pages if pages <= 3 else 3
-                    for page_num in range(pages_2_read):
-                        image_bytes = doc[page_num].get_pixmap(dpi=200).tobytes(output="png")  # Transform img to binary
-                        encode_image(data_object=file_data, img_bytes=image_bytes, suffix="png")
+                for page_num in range(1 if expand_context else pages_2_read):
+                    image_bytes = doc[page_num].get_pixmap(dpi=200).tobytes(output="png")  # Transform to binary
+                    encode_image(data_object=file_data, img_bytes=image_bytes, suffix="png")
+            doc.close()
         elif file_suffix == ".txt" or file_suffix == ".md":
             file_data.text = file_path.read_text(encoding="utf-8", errors="replace")[:char_limit]
+
         elif file_suffix in [".png", ".jpeg", ".jpg", ".webp", ".gif"]:
             suffix_clean = file_suffix.strip(".")  # Returns "png" or "jpeg" etc.
             image_bytes = file_path.read_bytes()
             encode_image(data_object=file_data, img_bytes=image_bytes, suffix=suffix_clean)
+
         else:
             file_data.text = "ERROR: File type is not supported and cannot be read..."
+
     elif file_path.is_dir():
         file_data.text = "ERROR: Received file path was a directory, not a file..."
     else:

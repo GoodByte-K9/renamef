@@ -80,12 +80,12 @@ def list_files(folder_path: str, recursive_listing: bool = False) -> Result:
         else:
             add_files_to_documents(root_path)
     elif root_path.is_file():
-        file_data.text = "ERROR: Path is not a directory"
+        file_data.text = "ERROR: Path is not a directory..."
         return file_data
     if any(documents_paths.values()):
         file_data.paths = documents_paths
     else:
-        file_data.text = "WARNING: No files supported by this tool were found."
+        file_data.text = "ERROR: Path does not exist..."
     return file_data
 
 
@@ -123,7 +123,7 @@ def read_file(absolute_file_path: str, expand_context: bool = False) -> Result:
 
     file_data = Result()
     file_path = Path(absolute_file_path)
-    char_limit = 1500 if expand_context is False else 2500
+    char_limit = 1500 if not expand_context else 2500
 
     if file_path.is_file():
         file_suffix = file_path.suffix.lower()
@@ -132,17 +132,18 @@ def read_file(absolute_file_path: str, expand_context: bool = False) -> Result:
                 file_data.text = cast(
                     str, pymupdf4llm.to_markdown(
                         file_path,
+                        pages=[0 if not expand_context else 3],
                         ocr_language=CONFIG["ocr"]["languages"]
-                    )[:char_limit])
+                    ))
             if file_data.text == "":
                 doc = pymupdf.open(file_path)
-                pages = 1 if expand_context is False else len(doc)
+                pages = 1 if not expand_context else len(doc)
                 pages_2_read = pages if pages <= 3 else 3
                 for page_num in range(pages_2_read):
                     image_bytes = doc[page_num].get_pixmap().tobytes(output="png")  # Transform page image to binary
                     encode_image(data_object=file_data, img_bytes=image_bytes, suffix="png")
         elif file_suffix == ".txt" or file_suffix == ".md":
-            file_data.text = file_path.read_text(encoding="utf-8")[:char_limit]
+            file_data.text = file_path.read_text(encoding="utf-8", errors="replace")[:char_limit]
         elif file_suffix in [".png", ".jpeg", ".jpg", ".webp", ".gif"]:
             suffix_clean = file_suffix.strip(".")  # Returns "png" or "jpeg" etc.
             image_bytes = file_path.read_bytes()

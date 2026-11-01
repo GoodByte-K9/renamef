@@ -19,11 +19,11 @@ def stop_model():
         stderr=subprocess.DEVNULL)
 
 
-def _help(_help: bool = False):
+def _help():
     print(help_command_list)
 
 
-def listf(path: str, recursive: bool = False, save: bool = False) -> str | None:
+def listf(path: str, recursive: bool = False, save: bool = False) -> None:
     global paths_dict
     clean_path = path.strip("\"'")
 
@@ -128,7 +128,7 @@ def renamef(file_path: str | None,
                 llm.reset_history()  # Clear so context window doesn't get out of hand
         paths_dict = {}  # Reset paths dict after name changes, as old entries cannot be reused
         print("Task finished.")
-    else:
+    elif issue:
         print(issue)
 
     stop_model()

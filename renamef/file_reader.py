@@ -47,9 +47,13 @@ def silence_native_stderr():  # ...This is possible because 'yield' turns the fu
 
 
 # ------------------------------ LIST FILES ------------------------------ #
-def list_files(folder_path: str, recursive_listing: bool = False) -> Result:
-    def find_folders_recursively(absolute_path: Path) -> list[Path]:
-        recursive_directories = [directory for directory in absolute_path.rglob("*/")]
+def list_files(folder_path: str, recursive_listing: bool = False) -> Result | None:
+    def find_folders_recursively(absolute_path: Path) -> list[Path] | Result:
+        try:
+            recursive_directories = [directory for directory in absolute_path.rglob("*/")]
+        except PermissionError:
+            file_data.text = "ERROR: Lacked read-permission to some subdirectories..."
+            return file_data
         recursive_directories.insert(0, absolute_path)
         return recursive_directories
 
@@ -73,19 +77,25 @@ def list_files(folder_path: str, recursive_listing: bool = False) -> Result:
     }
     root_path = Path(folder_path)  # Convert folder_path into a Path object
     if root_path.is_dir():
-        recursive_folders: list = find_folders_recursively(root_path) if recursive_listing is True else []
-        if recursive_folders:
+        # recursive_folders: list = find_folders_recursively(root_path) if recursive_listing is True else []
+        recursive_folders: list | Result = find_folders_recursively(root_path)
+        if isinstance(recursive_folders, list) and recursive_folders:
             for folder in recursive_folders:
                 add_files_to_documents(folder)
-        else:
+        elif isinstance(recursive_folders, list) and not recursive_folders:
             add_files_to_documents(root_path)
+        elif isinstance(recursive_folders, Result):
+            file_data = recursive_folders
+
     elif root_path.is_file():
         file_data.text = "ERROR: Path is not a directory..."
         return file_data
+    elif not root_path.is_file() and not root_path.is_dir():
+        print("ERROR: Path does not exist...")
     if any(documents_paths.values()):
         file_data.paths = documents_paths
     else:
-        file_data.text = "ERROR: Path does not exist..."
+        file_data.text = "WARNING: No supported files in given path..."
     return file_data
 
 
@@ -99,8 +109,7 @@ list_files_function = {
         "properties": {
             "folder_path": {
                 "type": "string",
-                "description": "The full absolute path where file(s) reside. If the path ends with a file name, only"
-                               "that one file is read."
+                "description": "The full absolute path where file(s) reside."
             },
             "recursive_listing": {
                 "type": "boolean",
@@ -132,16 +141,16 @@ def read_file(absolute_file_path: str, expand_context: bool = False) -> Result:
                 file_data.text = cast(
                     str, pymupdf4llm.to_markdown(
                         file_path,
-                        pages=[0 if not expand_context else 3],
+                        pages=[0] if not expand_context else [0, 1, 2],
                         ocr_language=CONFIG["ocr"]["languages"]
-                    ))
-            if file_data.text == "":
-                doc = pymupdf.open(file_path)
-                pages = 1 if not expand_context else len(doc)
-                pages_2_read = pages if pages <= 3 else 3
-                for page_num in range(pages_2_read):
-                    image_bytes = doc[page_num].get_pixmap().tobytes(output="png")  # Transform page image to binary
-                    encode_image(data_object=file_data, img_bytes=image_bytes, suffix="png")
+                    )[:char_limit])
+            if file_data.text.strip() == "":
+                with pymupdf.open(file_path) as doc:
+                    pages = 1 if not expand_context else len(doc)
+                    pages_2_read = pages if pages <= 3 else 3
+                    for page_num in range(pages_2_read):
+                        image_bytes = doc[page_num].get_pixmap(dpi=200).tobytes(output="png")  # Transform img to binary
+                        encode_image(data_object=file_data, img_bytes=image_bytes, suffix="png")
         elif file_suffix == ".txt" or file_suffix == ".md":
             file_data.text = file_path.read_text(encoding="utf-8", errors="replace")[:char_limit]
         elif file_suffix in [".png", ".jpeg", ".jpg", ".webp", ".gif"]:
@@ -160,23 +169,22 @@ def read_file(absolute_file_path: str, expand_context: bool = False) -> Result:
 
 read_file_function = {
     "name": "read_file",
-    "description": "Read a file in a given folder path. If it's a scanned pdf, it will use OCR to retrieve text."
+    "description": "Read a file in a given folder path. If it's a scanned pdf, it will use OCR to retrieve text. "
                    "If it fails to do so, it will send the image of the pdf for you to parse. Other images are also "
                    "processed and sent to you in data url format. By default the function will return a maximum of "
                    "1500 characters of text, or 1 image. The function returns a dataclass turned JSON. If something "
-                   "goes wrong, it returns a list[str] with a 'WARNING:' or 'ERROR:' message.",
+                   "goes wrong, it returns a Result object representation with an 'ERROR:' message.",
     "parameters": {
         "type": "object",
         "properties": {
             "absolute_file_path": {
                 "type": "string",
-                "description": "The full absolute path where pdf(s) reside. If the path ends with a file name, only"
-                               "that one file is read."
+                "description": "The full absolute path where a file resides."
             },
             "expand_context": {
                 "type": "boolean",
-                "description": "If True, function will return up to 2500 characters of text, or send all images from a "
-                               "pdf. Use only when you lack enough context to understand the document."
+                "description": "If True, function will return up to 2500 characters of text, or send up to 3 images "
+                               "from a pdf. Use only when you lack enough context to understand the document."
             }
         },
         "required": ["absolute_file_path"],

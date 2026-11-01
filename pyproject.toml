@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "renamef"
 license = "AGPL-3.0-or-later"
-version = "26.10.0"
+version = "26.11.0"
 requires-python = ">=3.12"
 dependencies = [
     "openai>=3.35",
@@ -15,6 +15,10 @@ dependencies = [
     "requests>=2.34",
     "tqdm>=4.70",
 ]
+
+[project.urls]
+Repository = "https://github.com/GoodByte-K9/renamef"
+Issues = "https://github.com/GoodByte-K9/renamef/issues"
 
 [project.scripts]
 renamef = "renamef.main:run"

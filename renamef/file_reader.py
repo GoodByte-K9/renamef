@@ -48,7 +48,7 @@ def silence_native_stderr():  # ...This is possible because 'yield' turns the fu
 
 # ------------------------------ LIST FILES ------------------------------ #
 def list_files(folder_path: str, recursive_listing: bool = False) -> Result:
-    def find_folders_recursively(absolute_path: Path) -> list[Path] | Result:
+    def find_folders_recursively(absolute_path: Path) -> list[Path]:
         recursive_directories = [directory for directory in absolute_path.rglob("*/")]
         if recursive_directories:
             recursive_directories.insert(0, absolute_path)
@@ -79,15 +79,12 @@ def list_files(folder_path: str, recursive_listing: bool = False) -> Result:
     }
     root_path = Path(folder_path)  # Convert folder_path into a Path object
     if root_path.is_dir():
-        recursive_folders: list | Result = find_folders_recursively(root_path) if recursive_listing else []
-        if isinstance(recursive_folders, list) and recursive_folders:
+        recursive_folders: list = find_folders_recursively(root_path) if recursive_listing else []
+        if recursive_folders:
             for folder in recursive_folders:
                 add_files_to_documents(folder)
-        elif isinstance(recursive_folders, list) and not recursive_folders:
+        else:
             add_files_to_documents(root_path)
-        elif isinstance(recursive_folders, Result):
-            file_data = recursive_folders
-            return file_data
         if file_data.text:
             return file_data
 

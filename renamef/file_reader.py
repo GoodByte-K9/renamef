@@ -50,15 +50,21 @@ def silence_native_stderr():  # ...This is possible because 'yield' turns the fu
 def list_files(folder_path: str, recursive_listing: bool = False) -> Result:
     def find_folders_recursively(absolute_path: Path) -> list[Path]:
         recursive_directories = [directory for directory in absolute_path.rglob("*/")]
-        recursive_directories.insert(0, absolute_path)
+        if recursive_directories:
+            recursive_directories.insert(0, absolute_path)
         return recursive_directories
 
     def add_files_to_documents(absolute_path: Path) -> None:
-        for f in absolute_path.iterdir():  # f = file or folder. Looping through all of them
-            if f.is_file():
-                for key in documents_paths.keys():
-                    if f.suffix.lower() == key:
-                        documents_paths[key].append(str(f))
+        try:
+            paths_list = list(absolute_path.iterdir())
+        except PermissionError as e:
+            file_data.text = f"ERROR: {e}"
+        else:
+            for f in paths_list:  # f = file or folder. Looping through all of them
+                if f.is_file():
+                    for key in documents_paths.keys():
+                        if f.suffix.lower() == key:
+                            documents_paths[key].append(str(f))
 
     file_data = Result()
     documents_paths: dict = {  # Filled up by the add_files_to_documents() function
@@ -73,19 +79,25 @@ def list_files(folder_path: str, recursive_listing: bool = False) -> Result:
     }
     root_path = Path(folder_path)  # Convert folder_path into a Path object
     if root_path.is_dir():
-        recursive_folders: list = find_folders_recursively(root_path) if recursive_listing is True else []
+        recursive_folders: list = find_folders_recursively(root_path) if recursive_listing else []
         if recursive_folders:
             for folder in recursive_folders:
                 add_files_to_documents(folder)
         else:
             add_files_to_documents(root_path)
+        if file_data.text:
+            return file_data
+
     elif root_path.is_file():
-        file_data.text = "ERROR: Path is not a directory"
+        file_data.text = "ERROR: Path is not a directory..."
+        return file_data
+    elif not root_path.is_file() and not root_path.is_dir():
+        file_data.text = "ERROR: Path does not exist..."
         return file_data
     if any(documents_paths.values()):
         file_data.paths = documents_paths
     else:
-        file_data.text = "WARNING: No files supported by this tool were found."
+        file_data.text = "WARNING: No supported files in given path..."
     return file_data
 
 
@@ -99,8 +111,7 @@ list_files_function = {
         "properties": {
             "folder_path": {
                 "type": "string",
-                "description": "The full absolute path where file(s) reside. If the path ends with a file name, only"
-                               "that one file is read."
+                "description": "The full absolute path where file(s) reside."
             },
             "recursive_listing": {
                 "type": "boolean",
@@ -123,59 +134,73 @@ def read_file(absolute_file_path: str, expand_context: bool = False) -> Result:
 
     file_data = Result()
     file_path = Path(absolute_file_path)
-    char_limit = 1500 if expand_context is False else 2500
+    char_limit = 1500 if not expand_context else 2500
 
     if file_path.is_file():
         file_suffix = file_path.suffix.lower()
+
         if file_suffix == ".pdf":
+            try:
+                doc = pymupdf.open(file_path)
+            except pymupdf.FileDataError:
+                file_data.text = "ERROR: Document is broken or corrupted..."
+                return file_data
+            else:
+                if doc.needs_pass:
+                    file_data.text = "ERROR: Document is password protected and cannot be read..."
+                    doc.close()
+                    return file_data
+
+            pages_2_read: int = len(doc) if len(doc) <= 3 else 3
             with silence_native_stderr():
                 file_data.text = cast(
                     str, pymupdf4llm.to_markdown(
                         file_path,
-                        ocr_language=CONFIG["ocr"]["languages"]
+                        pages=[0] if not expand_context else [nr for nr in range(pages_2_read)],
+                        ocr_language=ocr_languages
                     )[:char_limit])
-            if file_data.text == "":
-                doc = pymupdf.open(file_path)
-                pages = 1 if expand_context is False else len(doc)
-                pages_2_read = pages if pages <= 3 else 3
-                for page_num in range(pages_2_read):
-                    image_bytes = doc[page_num].get_pixmap().tobytes(output="png")  # Transform page image to binary
+            if file_data.text.strip() == "":
+                for page_num in range(1 if not expand_context else pages_2_read):
+                    image_bytes = doc[page_num].get_pixmap(dpi=200).tobytes(output="png")  # Transform to binary
                     encode_image(data_object=file_data, img_bytes=image_bytes, suffix="png")
+            doc.close()
         elif file_suffix == ".txt" or file_suffix == ".md":
-            file_data.text = file_path.read_text(encoding="utf-8")[:char_limit]
+            file_data.text = file_path.read_text(encoding="utf-8", errors="replace")[:char_limit]
+
         elif file_suffix in [".png", ".jpeg", ".jpg", ".webp", ".gif"]:
             suffix_clean = file_suffix.strip(".")  # Returns "png" or "jpeg" etc.
             image_bytes = file_path.read_bytes()
             encode_image(data_object=file_data, img_bytes=image_bytes, suffix=suffix_clean)
+
         else:
             file_data.text = "ERROR: File type is not supported and cannot be read..."
+
     elif file_path.is_dir():
         file_data.text = "ERROR: Received file path was a directory, not a file..."
     else:
-        file_data.text = "ERROR: Incorrect path — path, filename, or suffix might be erroneous..."
+        file_data.text = "ERROR: Incorrect path. Path, filename, or suffix might be erroneous, or access was denied..."
 
     return file_data
 
 
 read_file_function = {
     "name": "read_file",
-    "description": "Read a file in a given folder path. If it's a scanned pdf, it will use OCR to retrieve text."
+    "description": "Read a file in a given folder path. If it's a scanned pdf, it will use OCR to retrieve text. "
                    "If it fails to do so, it will send the image of the pdf for you to parse. Other images are also "
                    "processed and sent to you in data url format. By default the function will return a maximum of "
                    "1500 characters of text, or 1 image. The function returns a dataclass turned JSON. If something "
-                   "goes wrong, it returns a list[str] with a 'WARNING:' or 'ERROR:' message.",
+                   "goes wrong, it returns a Result object representation with an 'ERROR:' message.",
     "parameters": {
         "type": "object",
         "properties": {
             "absolute_file_path": {
                 "type": "string",
-                "description": "The full absolute path where pdf(s) reside. If the path ends with a file name, only"
-                               "that one file is read."
+                "description": "The full absolute path where a file resides."
             },
             "expand_context": {
                 "type": "boolean",
-                "description": "If True, function will return up to 2500 characters of text, or send all images from a "
-                               "pdf. Use only when you lack enough context to understand the document."
+                "description": "If True, function will return up to 2500 characters of text, or send up to 3 images "
+                               "from a pdf. Use only when you lack enough context to understand the document."
             }
         },
         "required": ["absolute_file_path"],

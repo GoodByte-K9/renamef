@@ -19,17 +19,18 @@ def stop_model():
         stderr=subprocess.DEVNULL)
 
 
-def _help(_help: bool = False):
+def _help():
     print(help_command_list)
 
 
-def listf(path: str, recursive: bool = False, save: bool = False) -> str | None:
+def listf(path: str, recursive: bool = False, save: bool = False) -> None:
     global paths_dict
+    clean_path = path.strip("\"'")
 
     if not recursive:
-        list_result: Result = list_files(path)
+        list_result: Result = list_files(clean_path)
     else:
-        list_result: Result = list_files(path, recursive_listing=True)
+        list_result: Result = list_files(clean_path, recursive_listing=True)
     if issue := list_result.text:
         print(issue)
         return
@@ -43,7 +44,8 @@ def listf(path: str, recursive: bool = False, save: bool = False) -> str | None:
 
 def summf(file_path: str, expand: bool = False, thinking: bool = False) -> None:
     llm = Assistant(thinking=thinking)
-    instruction_seed: str = prompts.summf + file_path
+    clear_filepath = file_path.strip("\"'")
+    instruction_seed: str = prompts.summf + clear_filepath
     if expand:
         instruction = instruction_seed + prompts.summf_expand
     else:
@@ -87,6 +89,7 @@ def renamef(file_path: str | None,
 
     global paths_dict
     file_list = None
+    issue = None
     clean_path = file_path.strip("\"'") if file_path is not None else None
 
     if isinstance(clean_path, str):
@@ -106,14 +109,16 @@ def renamef(file_path: str | None,
         if Path(clean_path).is_file():
             file_list = {"specific_file": [clean_path]}
         else:
-            file_list = list_files(clean_path, recursive).paths  # Result -> Dict
+            file_data = list_files(clean_path, recursive)  # Result -> Dict
+            file_list = file_data.paths
+            issue = file_data.text
 
-    if file_list is not None:
+    if file_list is not None and issue is None:
         nr_of_files = sum(len(_list) for _list in file_list.values())
         if not green_light(file_list, nr_of_files):  # Confirm from user whether the list of files should be renamed
             return
         print("Initiating task...")
-        llm = Assistant(thinking)  # Left outside loop so a new API client is not created each iteration -> shaves time
+        llm = Assistant(thinking=thinking)  # Left outside loop so API clients are not created each iteration
         print("Changes will be listed below: ")
         counter = 0
         for _list in file_list.values():
@@ -123,6 +128,8 @@ def renamef(file_path: str | None,
                 llm.reset_history()  # Clear so context window doesn't get out of hand
         paths_dict = {}  # Reset paths dict after name changes, as old entries cannot be reused
         print("Task finished.")
+    elif issue:
+        print(issue)
 
     stop_model()
 
@@ -142,6 +149,8 @@ def parse_arguments(command: list[str]) -> str | None:
     elif args.command == "renamef":
         if args.path and args.fetch:
             renamef_parser.error('argument -f/--fetch: not allowed with arguments "PATH"')
+        if not args.path and not args.fetch:
+            renamef_parser.error('you must enter either a "PATH" or -f/--fetch')
         commands["renamef"](file_path=args.path, fetch=args.fetch,
                             recursive=args.recursive, thinking=args.thinking)
     elif args.command == "exit":

@@ -13,7 +13,7 @@ Summarization Rules:
 - The summary should be able to answer the questions "what is this document about?" and "whom is it from?"
 - Avoid disclosing personal names or other personally identifiable information
 - Avoid repetition in your description
-- If the sender is not knows, speak of them as "unknown"
+- If the sender is not known, speak of them as "unknown"
 
 Answer Format
 - Use the following two titles: "What is this document about?" and "Whom is it from?"
@@ -40,6 +40,8 @@ This document is a short meeting note listing three action items for an upcoming
 
 Who is it from?
 Unknown.
+
+If read_file() returns an error or warning, forward it exactly as is to the user.
 
 Document to summarize: """
 summf_default = """

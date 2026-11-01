@@ -13,11 +13,15 @@ def rename_files(rename_plan: list[dict[str, str]]) -> Result:
 
     forbidden_characters = ["\\", "/", "..", ":", "*", "?", '"', "<", ">", "|"]
     for dictionary in rename_plan:
-        full_path = dictionary["original_path"]
-        new_name = dictionary["new_name"]
+        try:
+            _ = dictionary["original_path"]  # Validating if key exists
+            new_name = dictionary["new_name"]
+        except KeyError as e:
+            file_data.text = f"ERROR: Missing key: {e} in rename_plan"
+            return file_data
         # Check for sus in new_name
         if any(character in new_name for character in forbidden_characters):
-            file_data.text = f"Error: Process interrupted. File name {new_name} contains illegal symbols or characters."
+            file_data.text = f"ERROR: Process interrupted. File name {new_name} contains illegal symbols or characters."
             return file_data
 
     # Execute the renaming plan
@@ -30,14 +34,13 @@ def rename_files(rename_plan: list[dict[str, str]]) -> Result:
             try:
                 original_path.rename(new_path)
             except OSError as e:
-                error_message = str(e)
                 failures += 1
                 change_log.append(
-                    f"OSError: {error_message}. Failed to rename {original_path.name} to {new_name}.")
+                    f"ERROR: {e}. Failed to rename {original_path.name} to {new_name}.")
             else:
                 successes += 1
         else:
-            change_log.append(f"Error: {full_path} is not a file...")
+            change_log.append(f"ERROR: {full_path} is not a file...")
             failures += 1
 
     change_log[0] = f"Successes: {successes}"

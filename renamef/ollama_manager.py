@@ -74,15 +74,14 @@ def is_process_running():
 
 
 def server() -> subprocess.Popen | None:
-    print("checking if ollama server is running...")
     if is_process_running():
         return None
 
     logs_folder = Path(__name__).parent / "logs"
     logs_folder.mkdir(parents=True, exist_ok=True)
 
-    with open("../logs/ollama.log", "a", encoding="utf-8") as log:  # "a" = append
-        print("no server process found, starting process...")
+    with open(logs_folder / "ollama.log", "a", encoding="utf-8") as log:  # "a" = append
+        print("Starting up Ollama server...")
         ollama_server = subprocess.Popen(["ollama", "serve"], stdout=log, stderr=log)
     return ollama_server
 

@@ -3,6 +3,8 @@ import shlex
 import shutil
 import platform
 
+from openai import APIConnectionError
+
 from renamef.commands import parse_arguments
 from renamef import ollama_manager
 from renamef import texts
@@ -28,6 +30,7 @@ def run() -> None:
         print("No Ollama installation detected. Exiting...\n")
         sys.exit()
 
+    print("checking if ollama server is running...")
     ollama_server = ollama_manager.server()
     ollama_manager.pull_model()
     print(f"{texts.art}\n{texts.welcome}")
@@ -46,11 +49,16 @@ def run() -> None:
                 app_response = parse_arguments(user_input)
             except SystemExit:
                 pass
+            except APIConnectionError:
+                print("\nError: failed to reach LLM...")
+                ollama_server = ollama_manager.server()
+                if ollama_server is None:
+                    sys.exit("Failed to restart Ollama server, exiting app...")
             if app_response == "exit":
                 print("\nExiting...\n")
                 break
     except KeyboardInterrupt:
-        print("Exiting...\n")
+        print()
         sys.exit()
     finally:
         if ollama_server is not None:

@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 from dataclasses import asdict
 
 from openai import OpenAI
@@ -14,21 +15,24 @@ class Assistant:
         self.model = CONFIG["llm"]["model"]
         self.reasoning_effort = "none" if thinking is False else "medium"
         self.history: list = [{"role": "system", "content": system_instruction}]
-        self.openrouter = OpenAI(base_url="http://127.0.0.1:11434/v1", api_key="ollama")
+        self.local_llm = OpenAI(base_url="http://127.0.0.1:11434/v1", api_key="ollama")
         self.tools = [
             {"type": "function", "function": list_files_function},
             {"type": "function", "function": read_file_function},
             {"type": "function", "function": rename_files_function}
         ]
 
-    def chat(self, user_message: str) -> str | None:
+    def chat(self, user_message: str, command_used: str | None = None) -> str | None:
+
+        def llm_chat(msgs: list):
+            return self.local_llm.chat.completions.create(
+                model=self.model,
+                messages=msgs,
+                reasoning_effort=self.reasoning_effort,  # type: ignore
+                tools=self.tools,  # type: ignore
+            )
         messages = self.history + [{"role": "user", "content": user_message}]
-        response = self.openrouter.chat.completions.create(
-            model=self.model,
-            messages=messages,
-            reasoning_effort=self.reasoning_effort,  # type: ignore
-            tools=self.tools,  # type: ignore
-        )
+        response = llm_chat(messages)
         # Add user message and LLM reply to history:
         # self.history.append({"role": "user", "content": user_message})
         if not response.choices[0].finish_reason == "tool_calls":
@@ -37,15 +41,39 @@ class Assistant:
         while response.choices[0].finish_reason == "tool_calls":
             msg_4_tool = response.choices[0].message  # "message" holds the "role", "content", and "tool_calls" keys
             tool_result = Assistant.dispatcher(msg_4_tool)
+
             messages.append(msg_4_tool)
             messages.extend(tool_result)
             self.history = messages
-            response = self.openrouter.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                reasoning_effort=self.reasoning_effort,  # type: ignore
-                tools=self.tools,  # type: ignore
-            )
+
+            response = llm_chat(messages)
+
+            last_function_call = msg_4_tool.tool_calls[-1].function
+            finish_reason = response.choices[0].finish_reason
+
+            # -------------------------- nudge if model forgets to rename -------------------------- #
+            if command_used == "renamef" and last_function_call.name == "read_file" and finish_reason == "stop":
+                def feedback(usr_prompt):
+                    messages.append({"role": "assistant", "content": response.choices[0].message.content})
+                    messages.append(usr_prompt)
+                    self.history = messages
+                user_prompt = None
+                try:
+                    arguments = json.loads(last_function_call.arguments)
+                except json.JSONDecodeError:
+                    user_prompt = {"role": "user", "content": "ERROR: Invalid JSON structure..."}
+                else:
+                    try:
+                        path = Path(arguments["absolute_file_path"])
+                    except (TypeError, KeyError):
+                        user_prompt = {"role": "user", "content": "ERROR: Invalid JSON structure..."}
+                    else:
+                        if path.is_file():
+                            user_prompt = {"role": "user", "content":
+                                           f"You didn't use rename_files() on {path}. Please do so."}
+                if user_prompt is not None:
+                    feedback(user_prompt)
+                    response = llm_chat(messages)
 
         return response.choices[0].message.content
 

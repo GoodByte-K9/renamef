@@ -159,7 +159,9 @@ def read_file(absolute_file_path: str, expand_context: bool = False) -> Result:
                         pages=[0] if not expand_context else [nr for nr in range(pages_2_read)],
                         ocr_language=ocr_languages
                     )[:char_limit])
-            if file_data.text.strip() == "":
+                # Calculate number of alphanumeric chars to filter for OCR noise
+                nr_of_chars = sum(1 for character in file_data.text if character.isalnum())
+            if nr_of_chars <= 30:
                 for page_num in range(1 if not expand_context else pages_2_read):
                     image_bytes = doc[page_num].get_pixmap(dpi=200).tobytes(output="png")  # Transform to binary
                     encode_image(data_object=file_data, img_bytes=image_bytes, suffix="png")

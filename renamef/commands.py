@@ -52,7 +52,7 @@ def summf(file_path: str, expand: bool = False, thinking: bool = False) -> None:
         instruction = instruction_seed + prompts.summf_default
 
     print("Reading the document and contriving a summary...")
-    response = llm.chat(instruction)
+    response = llm.chat(user_message=instruction, command_used="summf")
     print(response)
     stop_model()
 
@@ -113,7 +113,7 @@ def renamef(file_path: str | None,
             file_list = file_data.paths
             issue = file_data.text
 
-    if file_list is not None and issue is None:
+    if file_list is not None and not issue:
         nr_of_files = sum(len(_list) for _list in file_list.values())
         if not green_light(file_list, nr_of_files):  # Confirm from user whether the list of files should be renamed
             return
@@ -124,7 +124,8 @@ def renamef(file_path: str | None,
         for _list in file_list.values():
             for file in _list:
                 counter += 1
-                print(f"Renamed file {counter}/{nr_of_files}\n{llm.chat(prompts.renamef_default + file)}\n")
+                llm_response = llm.chat(user_message=prompts.renamef_default+file, command_used="renamef")
+                print(f"Renamed file {counter}/{nr_of_files}\n{llm_response}\n")
                 llm.reset_history()  # Clear so context window doesn't get out of hand
         paths_dict = {}  # Reset paths dict after name changes, as old entries cannot be reused
         print("Task finished.")

@@ -8,18 +8,6 @@ from renamef.prompts import system_instruction
 from renamef.renamer import rename_files_function, rename_files
 from renamef.file_reader import Result, list_files_function, read_file_function, list_files, read_file
 
-# Example:
-# contents = {
-#     "image_content": {
-#         "<tool_id1>": [2, {"type": "image_url"}, {"type": "image_url"}],
-#         "<tool_id2>": [1, {"type": "image_url"}]
-#     },
-#     "tool_content": {
-#         "<tool_id1>": Result,
-#         "<tool_id2>": Result
-#     }
-# }
-
 
 class Assistant:
     def __init__(self, thinking: bool = False):
@@ -67,18 +55,18 @@ class Assistant:
     @staticmethod
     def dispatcher(llm_msg) -> list[dict]:
         contents = {  # Store tool results in a dict. Example structure below
-            "image_content": {},
-            "tool_content": {}
+            "tool_content": {},
+            "image_content": {}
         }
         # contents = {
-        #     "image_content": {
-        #         "<tool_id1>": [{"type": "image_url"}, {"type": "image_url"}],
-        #         "<tool_id2>": [{"type": "image_url"}, {"type": "image_url"}]
-        #     },
         #     "tool_content": {
         #         "<tool_id1>": str,
         #         "<tool_id2>": str
-        #     }
+        #     },
+        #     "image_content": {
+        #         "<tool_id1>": [2, {"type": "image_url"}, {"type": "image_url"}],
+        #         "<tool_id2>": [1, {"type": "image_url"}]
+        #     }               # ^^^number of images in the list
         # }
         tool_registry = {
             "list_files": list_files,

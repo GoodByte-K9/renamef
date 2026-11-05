@@ -20,7 +20,26 @@ One can use features like `listf` or `summf` to list files in a directory or giv
 - Renamef will check if you have Ollama installed, if not, it will attempt to install it for you and subsequently pull the relevant model from Ollama to your machine.
 
 ## Installation
-...
+Install Python 3.12 or newer (on Windows, adding it to PATH during setup). Then, open a terminal and...
+
+#### Windows 
+1. Install pipx: `python -m pip install --user pipx`
+2. Add pipx to your PATH: `python -m pipx ensurepath`
+3. Restart terminal
+4. Install Renamef: `pipx install renamef`
+
+#### Mac
+1. Install Homebrew: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"` (then run the commands it shows under 'Next steps')
+2. Install pipx: `brew install pipx`
+3. Add pipx to your PATH: `pipx ensurepath`
+4. Restart terminal
+5. Install Renamef: `pipx install renamef`
+
+#### Linux
+1. Install pipx: `sudo apt install pipx` (or whatever package manager you use)
+2. Add pipx to your PATH: `pipx ensurepath`
+3. Restart terminal
+4. Install Renamef: `pipx install renamef`
 
 ## Usage
 1. Open terminal

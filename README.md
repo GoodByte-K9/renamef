@@ -3,7 +3,7 @@ A privacy-oriented app that renames or summarizes documents using a local LLM.\
 (name pronounced in a Shakespearean manner with an English accent, followed by a snobbish twitch of an eyebrow)
 
 ## Features
-<img width="700" alt="renamef" src="https://github.com/user-attachments/assets/c653c182-e9c6-42ce-8cb2-87d92dff976c" />  
+<img width="700" alt="renamef" src="https://raw.githubusercontent.com/GoodByte-K9/renamef/main/assets/renamef.gif" />  
 <br><br>
 
 Renamef's greatest strength is privacy: no data leaves your local machine and you can automate the renaming of (theoretically) as many files as you want.
@@ -50,7 +50,7 @@ Install Python 3.12 or newer (on Windows, adding it to PATH during setup). Then,
 Example: `summf --thinking "C:\Users\Public\Documents\2026-03-14_product-spec_chronodyne.pdf"`
 <br>
 
-<img width="700" alt="renamef_summf" src="https://github.com/user-attachments/assets/e7e09a39-0083-484d-9ffb-76aceff0d6d1" />
+<img width="700" alt="renamef_summf" src="https://raw.githubusercontent.com/GoodByte-K9/renamef/main/assets/renamef_summf.gif" />
 
 ## Configuration
 The following things can be configured in `renamef`:

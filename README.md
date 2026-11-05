@@ -58,14 +58,11 @@ The following things can be configured in `renamef`:
 - Supported languages (by default they are English, German and Finnish)
 - Location of the tessdata folder
 
-You can do any of the above by editing the `renamef/config.toml` file in the project's package folder with a text editor of your choice.  
-Currently, the `config.toml` is buried deep within the user folder. To find it, run the following command on any platform:  
-`pipx runpip renamef show renamef`. The "Location" line shows the path to the project's package folder, where you can find the `renamef` directory.  
-An additional limitation is that the file resets whenever you choose to update the app.
+You can do any of the above by editing the `renamef/config.toml` file in the project's package folder with a text editor of your choice. Currently, the `config.toml` is buried deep within the user folder. To find it, run the following command on any platform:  
+`pipx runpip renamef show renamef`. The "Location" line shows the path to the project's package folder, where you can find the `renamef` directory. An additional limitation is that the file resets whenever you choose to update the app.
 
 #### Changing the model
-The underlying LLM can be changed simply by changing the model's name to one you wish to use. You can find a list of local models from the [Ollama website](https://ollama.com/search?c=local).  
-Note that larger models will require more VRAM or system memory than the default model.
+The underlying LLM can be changed simply by changing the model's name to one you wish to use. You can find a list of local models from the [Ollama website](https://ollama.com/search?c=local). Note that larger models will require more VRAM or system memory than the default model.
 
 #### Expanding language support
 1. Download additional languages from [tesseract-ocr/tessdata](https://github.com/tesseract-ocr/tessdata)

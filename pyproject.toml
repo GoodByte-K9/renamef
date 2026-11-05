@@ -5,7 +5,9 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "renamef"
 license = "AGPL-3.0-or-later"
+readme = "README.md"
 version = "26.11.0"
+description = "A private, fully local, LLM-powered file renaming solution."
 requires-python = ">=3.12"
 dependencies = [
     "openai>=3.35",

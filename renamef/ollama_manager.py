@@ -26,6 +26,7 @@ def download_installer(url: str) -> Path | None:
     url_path = url_components.path  # '/download/OllamaSetup.exe'
     installer_name = PurePosixPath(url_path).name  # turn into path object and keep name only: 'OllamaSetup.exe'
     final_destination = Path(tempfile.gettempdir()) / installer_name  # C:\ ... \Temp\OllamaSetup.exe 💀
+    temp_destination = Path(str(final_destination) + ".part")
 
     if final_destination.is_file():
         return final_destination
@@ -35,13 +36,16 @@ def download_installer(url: str) -> Path | None:
         response.raise_for_status()
         installer_size = int(response.headers.get("content-length", 0))  # response body size in bytes; default: 0
 
-        with open(final_destination, "wb") as file:  # wb = write binary in final_destination
+        with open(temp_destination, "wb") as file:  # wb = write binary in C:\ ... \Temp\OllamaSetup.exe.part
             with tqdm(total=installer_size, unit="B", unit_scale=True, desc="Downloading") as bar:
                 # iter_content() reads chunks produced by requests.get(stream=True); only 1 chunk is in memory at a time
                 for chunk in response.iter_content(chunk_size=1024*1024):  # chunk: a 1024*1024 bytes sized chunk (1MB)
                     file.write(chunk)
                     bar.update(len(chunk))
-    return final_destination
+    if installer_size == temp_destination.stat().st_size or installer_size == 0:
+        temp_destination.rename(final_destination)
+        return final_destination
+    return None
 
 
 def install() -> None:
@@ -54,6 +58,10 @@ def install() -> None:
         return
 
     installer = download_installer(url)
+    if installer is None:
+        print("ERROR: Installer might be corrupt or broken...")
+        return
+
     # launch installer:
     if _os == "Windows":
         print(texts.setup_wait)
@@ -77,7 +85,7 @@ def server() -> subprocess.Popen | None:
     if is_process_running():
         return None
 
-    logs_folder = Path(__name__).parent / "logs"
+    logs_folder = Path(__file__).parent / "logs"
     logs_folder.mkdir(parents=True, exist_ok=True)
 
     with open(logs_folder / "ollama.log", "a", encoding="utf-8") as log:  # "a" = append
@@ -88,8 +96,9 @@ def server() -> subprocess.Popen | None:
 
 def terminate_process(process):
     process.terminate()
-    process.wait(timeout=5)
-    if process:
+    try:
+        process.wait(timeout=5)
+    except subprocess.TimeoutExpired:
         process.kill()
 
 
